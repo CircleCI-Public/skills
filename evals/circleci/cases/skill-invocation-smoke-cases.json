@@ -1,0 +1,28 @@
+{
+  "cases": [
+    {
+      "id": "builds-explicit-smoke",
+      "purpose": "Validate explicit skill mention routes to circleci-builds in a real codex run.",
+      "prompt": "Use $circleci-builds to diagnose the first failing CircleCI step.",
+      "expected_skill": "circleci-builds"
+    },
+    {
+      "id": "chunk-explicit-smoke",
+      "purpose": "Validate explicit skill mention routes to chunk in a real codex run.",
+      "prompt": "Use $chunk to outline chunk-cli auth setup for this repo.",
+      "expected_skill": "chunk"
+    },
+    {
+      "id": "cli-implicit-smoke",
+      "purpose": "Validate intent-based routing to circleci-cli without explicit skill name.",
+      "prompt": "Use the CircleCI CLI to authenticate and rerun the latest failed workflow.",
+      "expected_skill": "circleci-cli"
+    },
+    {
+      "id": "negative-control-smoke",
+      "purpose": "Validate unrelated prompts do not claim a CircleCI skill selection.",
+      "prompt": "Write a short onboarding checklist for new backend hires.",
+      "expected_skill": null
+    }
+  ]
+}

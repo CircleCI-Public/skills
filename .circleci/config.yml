@@ -1,0 +1,18 @@
+version: 2.1
+
+jobs:
+  skill-evals:
+    docker:
+      - image: cimg/python:3.11
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Run CircleCI skill evals
+          command: |
+            evals/circleci/scripts/run_routing_evals_ci.sh
+
+workflows:
+  evals:
+    jobs:
+      - skill-evals

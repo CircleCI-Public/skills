@@ -1,0 +1,34 @@
+{
+  "cases": [
+    {
+      "id": "builds-explicit",
+      "prompt": "Use $circleci-builds at /Users/michaelwebster/workspace/project-sphere/skills/plugins/circleci/skills/builds/SKILL.md to diagnose a failing CircleCI job and propose the smallest safe fix.",
+      "expected_skill": "circleci-builds",
+      "trigger_type": "explicit"
+    },
+    {
+      "id": "builds-implicit",
+      "prompt": "Our CircleCI pipeline is red. Please inspect the first failing step and identify the likely root cause.",
+      "expected_skill": "circleci-builds",
+      "trigger_type": "implicit"
+    },
+    {
+      "id": "chunk-explicit",
+      "prompt": "Use $chunk at /Users/michaelwebster/workspace/project-sphere/skills/plugins/circleci/skills/chunk/SKILL.md to set up chunk-cli auth and outline next commands.",
+      "expected_skill": "chunk",
+      "trigger_type": "explicit"
+    },
+    {
+      "id": "chunk-implicit",
+      "prompt": "Help me configure Chunk in CircleCI and use chunk-cli build-prompt for this repo.",
+      "expected_skill": "chunk",
+      "trigger_type": "implicit"
+    },
+    {
+      "id": "negative-control",
+      "prompt": "Write a short onboarding checklist for new backend hires.",
+      "expected_skill": null,
+      "trigger_type": "negative"
+    }
+  ]
+}
