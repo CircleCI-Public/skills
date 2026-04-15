@@ -1,0 +1,136 @@
+{
+  "skills": {
+    "circleci-builds": {
+      "phrases": [
+        "failing build",
+        "failed build",
+        "failed job",
+        "build failure",
+        "root cause",
+        "failure logs",
+        "flaky",
+        "red pipeline"
+      ]
+    },
+    "circleci-cli": {
+      "phrases": [
+        "circleci cli",
+        "cli",
+        "command line",
+        "rerun",
+        "authenticate",
+        "auth token",
+        "pipeline list",
+        "rerun workflow",
+        "trigger pipeline",
+        "validate config"
+      ]
+    },
+    "circleci-config": {
+      "phrases": [
+        ".circleci/config.yml",
+        "optimize ci",
+        "reduce runtime",
+        "caching",
+        "cache key",
+        "workspaces",
+        "parallelism",
+        "pipeline waste"
+      ]
+    },
+    "chunk": {
+      "phrases": [
+        "chunk",
+        "chunk-cli",
+        "build-prompt",
+        "chunk ui",
+        "configure chunk",
+        "chunk task",
+        "chunk sandbox",
+        "chunk auth"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "prompt": "Our CircleCI workflow is red after yesterday's merge. Please inspect the failing job logs and identify the root cause.",
+      "expected": "circleci-builds"
+    },
+    {
+      "prompt": "Use $circleci-builds to diagnose this failing CircleCI job and propose the minimum safe fix.",
+      "expected": "circleci-builds"
+    },
+    {
+      "prompt": "CI has become flaky this week and retries sometimes pass. Help me triage the first failing step.",
+      "expected": "circleci-builds"
+    },
+    {
+      "prompt": "Use the CircleCI CLI to authenticate and list recent pipelines for this branch.",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "Use $circleci-cli to rerun the failed workflow from the command line.",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "Can you rerun the failed workflow from the command line and share the command output?",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "Please optimize .circleci/config.yml and improve cache key strategy to reduce runtime.",
+      "expected": "circleci-config"
+    },
+    {
+      "prompt": "Use $circleci-config to reduce pipeline runtime and tune caching/workspaces.",
+      "expected": "circleci-config"
+    },
+    {
+      "prompt": "I need help tuning workspaces and parallelism to remove pipeline waste.",
+      "expected": "circleci-config"
+    },
+    {
+      "prompt": "Help me set up Chunk in CircleCI and configure environments so we can run AI-assisted build fixes.",
+      "expected": "chunk"
+    },
+    {
+      "prompt": "Use $chunk to configure chunk-cli auth and run build-prompt for this repository.",
+      "expected": "chunk"
+    },
+    {
+      "prompt": "Use chunk-cli to run auth and build-prompt for this repo.",
+      "expected": "chunk"
+    },
+    {
+      "prompt": "Write a React chart component for analytics dashboards.",
+      "expected": null
+    },
+    {
+      "prompt": "Draft a hiring scorecard for backend interviews.",
+      "expected": null
+    },
+    {
+      "prompt": "Please summarize this pull request and highlight risky code paths.",
+      "expected": null
+    },
+    {
+      "prompt": "Set up a GitHub Actions workflow to run pytest and upload coverage.",
+      "expected": null
+    },
+    {
+      "prompt": "Investigate why our Kubernetes pod is CrashLoopBackOff in our cluster.",
+      "expected": null
+    },
+    {
+      "prompt": "Create a Terraform module for an S3 bucket with encryption enabled.",
+      "expected": null
+    },
+    {
+      "prompt": "Generate API docs from our OpenAPI schema and publish them to a docs site.",
+      "expected": null
+    },
+    {
+      "prompt": "Help debug an intermittent Playwright test in our local test suite.",
+      "expected": null
+    }
+  ]
+}
