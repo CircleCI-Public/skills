@@ -8,8 +8,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install codex
-          command: sudo npm install -g @openai/codex
+          name: Install Python dependencies
+          command: pip install pyyaml
       - run:
           name: Run CircleCI skill evals
           command: |

@@ -151,7 +151,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--quick-validate-path",
-        default=str(Path.home() / ".codex/skills/.system/skill-creator/scripts/quick_validate.py"),
+        default=str(Path(__file__).resolve().parent / "quick_validate.py"),
         help="Path to skill-creator quick_validate.py",
     )
     args = parser.parse_args()
