@@ -9,7 +9,7 @@ jobs:
       - checkout
       - run:
           name: Install codex
-          command: npm install -g @openai/codex
+          command: sudo npm install -g @openai/codex
       - run:
           name: Run CircleCI skill evals
           command: |
