@@ -8,6 +8,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Python dependencies
+          command: pip3 install pyyaml
+      - run:
           name: Run CircleCI skill evals
           command: |
             evals/circleci/scripts/run_routing_evals_ci.sh
