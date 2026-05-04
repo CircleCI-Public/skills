@@ -49,6 +49,16 @@
         "chunk sandbox",
         "chunk auth"
       ]
+    },
+    "circleci-smarter-testing": {
+      "phrases": [
+        "smarter testing",
+        "testsuite",
+        "test-suites.yml",
+        "test impact analysis",
+        "dynamic test splitting",
+        "auto rerun failed tests"
+      ]
     }
   },
   "cases": [
@@ -99,6 +109,22 @@
     {
       "prompt": "Use chunk-cli to run auth and build-prompt for this repo.",
       "expected": "chunk"
+    },
+    {
+      "prompt": "Use $circleci-smarter-testing to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
+      "expected": "circleci-smarter-testing"
+    },
+    {
+      "prompt": "Help us onboard this repo to CircleCI Smarter Testing with discover and run commands and doctor validation.",
+      "expected": "circleci-smarter-testing"
+    },
+    {
+      "prompt": "We want dynamic test splitting and test impact analysis for our testsuite in CircleCI.",
+      "expected": "circleci-smarter-testing"
+    },
+    {
+      "prompt": "Optimize our Jest unit tests for readability and maintainability in the codebase.",
+      "expected": null
     },
     {
       "prompt": "Write a React chart component for analytics dashboards.",

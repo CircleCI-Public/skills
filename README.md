@@ -14,6 +14,7 @@ Skills include:
 - usage of the chunk cli and cloud based modes
 - circleci cli usage
 - circleci config management and optimization
+- CircleCI Smarter Testing (testsuite) onboarding and `test-suites.yml` setup
 
 ## Manual eval runs
 
@@ -35,6 +36,7 @@ Routing case purpose (`evals/circleci/cases/skill-routing-cases.json`):
 - `circleci-cli` cases: ensure CLI/auth/rerun/command-line prompts route to `circleci-cli` (explicit + implicit).
 - `circleci-config` cases: ensure `.circleci/config.yml`, caching, workspace, and runtime optimization prompts route to `circleci-config` (explicit + implicit).
 - `chunk` cases: ensure Chunk setup and `chunk-cli` prompts route to `chunk` (explicit + implicit).
+- `circleci-smarter-testing` cases: ensure Smarter Testing, testsuite, and `test-suites.yml` prompts route to `circleci-smarter-testing` (explicit + implicit).
 - negative-control cases: ensure non-CircleCI prompts route to `null`.
 
 ### 2) Local invocation smoke (codex `--json`, not in CI)
@@ -59,6 +61,7 @@ Invocation smoke case purpose (`evals/circleci/cases/skill-invocation-smoke-case
 - `builds-explicit-smoke`: validate explicit `$circleci-builds` prompt selects `circleci-builds`.
 - `chunk-explicit-smoke`: validate explicit `$chunk` prompt selects `chunk`.
 - `cli-implicit-smoke`: validate CLI intent prompt selects `circleci-cli` without explicit skill mention.
+- `smarter-testing-explicit-smoke`: validate explicit `$circleci-smarter-testing` prompt selects `circleci-smarter-testing`.
 - `negative-control-smoke`: validate unrelated prompt reports `none`.
 
 ### 3) Trace evals (full codex `--json` capture + grading, optional)
@@ -70,5 +73,6 @@ evals/circleci/scripts/run_trace_capture_evals_local.sh
 Trace case purpose (`evals/circleci/cases/trace-cases.json`):
 - validate codex capture preflight and JSONL artifact generation for explicit and implicit prompts.
 - validate grading behavior for expected skill mention and negative controls.
+- `smarter-testing-explicit` / `smarter-testing-implicit`: validate `$circleci-smarter-testing` and Smarter Testing migration prompts.
 
 If codex preflight fails with a network error, verify that `codex exec` can reach OpenAI endpoints from your environment.

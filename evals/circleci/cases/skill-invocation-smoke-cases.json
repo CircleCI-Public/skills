@@ -19,6 +19,12 @@
       "expected_skill": "circleci-cli"
     },
     {
+      "id": "smarter-testing-explicit-smoke",
+      "purpose": "Validate explicit skill mention routes to circleci-smarter-testing in a real codex run.",
+      "prompt": "Use $circleci-smarter-testing to outline testsuite setup with discover, run, and doctor for this repo.",
+      "expected_skill": "circleci-smarter-testing"
+    },
+    {
       "id": "negative-control-smoke",
       "purpose": "Validate unrelated prompts do not claim a CircleCI skill selection.",
       "prompt": "Write a short onboarding checklist for new backend hires.",

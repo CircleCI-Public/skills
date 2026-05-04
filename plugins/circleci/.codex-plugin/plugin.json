@@ -31,7 +31,8 @@
     "defaultPrompt": [
       "Review the CircleCI configuration for this project and suggest improvements",
       "Diagnose and fix build failures for the current branch",
-      "Setup the Chunk cli for this project"
+      "Setup the Chunk cli for this project",
+      "Setup CircleCI Smarter Testing for running tests in this project"
     ],
     "brandColor": "#049B4A",
     "composerIcon": "./assets/logo.svg",
