@@ -7,9 +7,19 @@ description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/t
 
 ## Overview
 
-**Beta** ([Discuss](https://discuss.circleci.com/t/product-launch-smarter-testing-is-now-in-beta/54497)). Deliver runnable `test-suites.yml`, CI wiring, and optional testsuite features. Validate with `circleci run testsuite "<suite name>" --doctor` in a loop until all checks pass, then a full run without `--doctor` if needed.
+**Beta** ([Discuss](https://discuss.circleci.com/t/product-launch-smarter-testing-is-now-in-beta/54497)). Create or adjust `.circleci/test-suites.yml`, wire it into CI, and validate with `--doctor` until checks pass. Let doctor diagnose YAML, command, JUnit, and testsuite errors before adding extra guidance.
 
-**Scope:** `test-suites.yml`, `circleci run testsuite`, testsuite options, doctor. Not legacy `circleci tests run` / timings-only JUnit tuning → **`circleci-config`** ([test-results-and-splitting.md](../config/references/test-results-and-splitting.md)). Primary doc: [Getting started](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/).
+## Doctor command (required)
+
+The testsuite CLI uses Bubble Tea and **must** run with a TTY. When iterating with `--doctor`, the agent **must always** run this exact command (substitute the suite name only):
+
+```bash
+script -q /dev/null circleci run testsuite "<suite name>" --doctor
+```
+
+Do not modify this command: no pipes, `tail`, redirects, backgrounding, or truncation.
+
+**Scope:** testsuite setup and validation. Not legacy `circleci tests run` / timings-only JUnit tuning → **`circleci-config`** ([test-results-and-splitting.md](../config/references/test-results-and-splitting.md)). Primary doc: [Getting started](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/).
 
 **Lazy references:** read only what the task needs—do not load every reference file up front.
 
@@ -19,7 +29,7 @@ description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/t
 
 ## Inputs To Gather
 
-- Runner, monorepo test root, existing `.circleci/config.yml`
+- Runner, test root, existing `.circleci/config.yml`
 - Optional: TIA, dynamic splitting, auto-rerun limits
 - Hand off: **`circleci-cli`** (install/auth/plugin) | **`circleci-config`** (JUnit/`circleci tests run` without testsuite) | **`circleci-builds`** (CI fails after doctor-clean config)
 
@@ -27,8 +37,8 @@ description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/t
 
 1. **Inspect** — runner, layout, existing CI; reuse documented test commands; run testsuite from the test root (no `cd` in YAML).
 2. **Baseline** — `.circleci/test-suites.yml` with `name`, `discover`, `run`, `outputs.junit` (see [runners.md](references/runners.md)).
-3. **Doctor** — `circleci run testsuite "<suite name>" --doctor`; fix discover/JUnit/reporters/plugins; repeat until pass.
-4. **Local vs CI** — Local: [CLI](https://circleci.com/docs/guides/toolkit/local-cli/) + testsuite plugin (`brew install circleci/tap/circleci-testsuite` on macOS; [binaries](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/) on Linux/WSL). CI: `circleci run testsuite` on executors + [ci-and-junit.md](references/ci-and-junit.md).
+3. **Doctor** — run the exact command above; apply its guidance; repeat until pass.
+4. **Local vs CI** — Local needs [CLI](https://circleci.com/docs/guides/toolkit/local-cli/) + testsuite plugin (`brew install circleci/tap/circleci-testsuite` on macOS; [binaries](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/) on Linux/WSL). CI uses `circleci run testsuite` on executors + [ci-and-junit.md](references/ci-and-junit.md).
 5. **Optional features** — only if asked; see [optional-features.md](references/optional-features.md); doctor after each change.
 6. **Verify** — full `circleci run testsuite "<suite name>"`; optional TIA/rerun checks per docs.
 
@@ -43,7 +53,7 @@ description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/t
 
 - [runners.md](references/runners.md) — `test-suites.yml` template, Vitest, pytest, pointers for other runners
 - [ci-and-junit.md](references/ci-and-junit.md) — full `config.yml`, JUnit directory upload
-- [optional-features.md](references/optional-features.md) — TIA, splitting, auto-rerun, doctor
+- [optional-features.md](references/optional-features.md) — TIA, splitting, auto-rerun
 - [test-results-and-splitting.md](../config/references/test-results-and-splitting.md) — classic test metadata path
 
 ## Output Contract

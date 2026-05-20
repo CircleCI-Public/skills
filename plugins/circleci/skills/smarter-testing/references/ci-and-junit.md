@@ -1,14 +1,14 @@
 # CI wiring and JUnit upload
 
-Commands in `test-suites.yml` are **relative to the directory where** `circleci run testsuite` **runs**. Do not use `cd` or `--directory` inside YAML command strings.
+Commands in `test-suites.yml` are relative to where `circleci run testsuite` runs. Do not use `cd` or `--directory` inside YAML command strings.
 
-- **Executors:** `circleci run testsuite` is already on CircleCI executors; install the testsuite plugin **locally** only for doctor runs.
+- **Executors:** `circleci run testsuite` is already on CircleCI executors; install the testsuite plugin locally only for doctor runs.
 - **JUnit folder:** `mkdir -p` the parent of `outputs.junit` before testsuite if the runner does not create it.
 - **Classic path:** JUnit / `circleci tests run` / timings splits without testsuite → [test-results-and-splitting.md](../../config/references/test-results-and-splitting.md).
 
 ## Example `.circleci/config.yml`
 
-Assumes `.circleci/test-suites.yml` with `name: ci tests` and `outputs.junit` under `test-reports/`. Adjust image and install for your stack.
+Assumes `name: ci tests` and `outputs.junit` under `test-reports/`. Adjust image and install for the stack.
 
 ```yaml
 version: 2.1
@@ -36,6 +36,6 @@ workflows:
       - test
 ```
 
-Skip `mkdir -p test-reports` if `run` in `test-suites.yml` already creates that folder. Point `store_test_results` at the **directory** from `outputs.junit` (for example `test-reports`), not one XML file—testsuite may write **multiple** JUnit files and CircleCI needs the whole directory.
+Skip `mkdir -p test-reports` if the runner creates that folder. Point `store_test_results` at the directory from `outputs.junit`, not one XML file.
 
 **Dynamic splitting:** job `parallelism` greater than 1 plus `options.dynamic-test-splitting: true` in `test-suites.yml`; same `circleci run testsuite "ci tests"` on each node. Details: [optional-features.md](optional-features.md).

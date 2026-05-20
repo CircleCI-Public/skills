@@ -1,6 +1,6 @@
 # `test-suites.yml` by runner
 
-Read **only** the section that matches the detected runner. Other stacks: [Getting started](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/) and [config reference](https://circleci.com/docs/guides/test/testsuite-configuration-reference/).
+Read only the matching runner section. For other stacks, use [Getting started](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/) and the [config reference](https://circleci.com/docs/guides/test/testsuite-configuration-reference/).
 
 ## Template
 
@@ -37,11 +37,4 @@ outputs:
 
 ## Other runners (official starters)
 
-| Runner | Notes |
-|--------|--------|
-| Jest | [jest-junit](https://www.npmjs.com/package/jest-junit) devDependency; `--reporters=default --reporters=jest-junit` |
-| Go | `gotestsum` + `go list` discover; TIA needs `file-mapper` — see [optional-features.md](optional-features.md) |
-| RSpec | `rspec_junit_formatter` gem |
-| Mocha | xunit reporter to `<< outputs.junit >>` |
-
-Copy full YAML from the getting-started guide; then run `circleci run testsuite "ci tests" --doctor`.
+Jest, Go, RSpec, and Mocha starters are in the getting-started guide. Copy the closest starter, preserve the repo's existing test command, and run doctor.

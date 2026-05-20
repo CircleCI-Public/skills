@@ -1,10 +1,10 @@
 # Optional testsuite features
 
-Enable only when the user asks. Re-run `circleci run testsuite "<suite name>" --doctor` after each change.
+Enable only when the user asks. Re-run doctor after each change.
 
 ## Test impact analysis
 
-[Set up test impact analysis](https://circleci.com/docs/guides/test/set-up-test-impact-analysis/). Coverage plugins: Vitest, Jest, Mocha, pytest, RSpec (`*-circleci-coverage` on GitHub under `circleci/`). Selection tuning: `full-test-run-paths`, `test-selection-rules` in [config reference](https://circleci.com/docs/guides/test/testsuite-configuration-reference/#options).
+[Set up test impact analysis](https://circleci.com/docs/guides/test/set-up-test-impact-analysis/). Coverage plugins exist for Vitest, Jest, Mocha, pytest, and RSpec. Selection tuning: `full-test-run-paths`, `test-selection-rules` in [config reference](https://circleci.com/docs/guides/test/testsuite-configuration-reference/#options).
 
 **Vitest**
 
@@ -23,7 +23,7 @@ options:
   test-impact-analysis: true
 ```
 
-Do not commit local impact JSON under `.circleci/`. CI branch flags: `--select-tests`, `--analyze-tests` (TIA guide).
+Do not commit local impact JSON under `.circleci/`. CI branch flags: `--select-tests`, `--analyze-tests`.
 
 ## Dynamic test splitting
 
@@ -43,11 +43,3 @@ options:
 ```
 
 `max-auto-rerun` is 0–10. [Doc](https://circleci.com/docs/guides/test/auto-rerun-failed-tests/).
-
-## Doctor
-
-```bash
-circleci run testsuite "ci tests" --doctor
-```
-
-Use the exact `name:` from `test-suites.yml`.
