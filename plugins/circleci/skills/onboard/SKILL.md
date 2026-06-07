@@ -1,14 +1,6 @@
 ---
 name: onboarding
-description: >
-  Agent-driven onboarding guide for CircleCI. Walks a user through the full
-  setup journey: account creation, org setup, GitHub App connection, project
-  creation, pipeline definition + trigger, and iterating a config file until
-  it passes. Use this skill whenever a user says "onboard to CircleCI",
-  "set up CircleCI", "get started with CircleCI", "connect my repo to
-  CircleCI", "create a CircleCI project", or asks for help with any early
-  CircleCI setup step. Also trigger if the user has a new repo and wants CI
-  running on it.
+description: "Agent-driven onboarding guide for CircleCI. Walks a user through the full setup journey: account creation, org setup, GitHub App connection, project creation, pipeline definition + trigger, and iterating a config file until it passes. Use this skill whenever a user says \"onboard to CircleCI\", \"set up CircleCI\", \"get started with CircleCI\", \"connect my repo to CircleCI\", \"create a CircleCI project\", or asks for help with any early CircleCI setup step. Also trigger if the user has a new repo and wants CI running on it."
 ---
 
 # CircleCI Onboarding
