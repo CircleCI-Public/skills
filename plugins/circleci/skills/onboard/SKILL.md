@@ -15,7 +15,27 @@ answer yourself. Skip stages that are already complete.
 
 ## Stage 0: Check prerequisites
 
-Run `circleci auth me` before asking anything. If it returns a user, skip
+First, verify the CLI version:
+
+```bash
+circleci version
+```
+
+Extract the version number from the output (e.g. `circleci 0.1.2+...` → `0.1.2`).
+If the major version is `0` (i.e. below `1.0.0`), stop and tell the user:
+
+> "This onboarding flow requires CircleCI CLI version 1.0.0 or later.
+> Your installed version is `<version>`. Please upgrade with:
+>
+> ```
+> brew tap circleci-public/homebrew-circleci
+> brew remove circleci
+> brew install --cask circleci@next
+> ```"
+
+Do not proceed past this stage if the version check fails.
+
+Then run `circleci auth me` before asking anything. If it returns a user, skip
 Stage 1 and note the username.
 
 ---
