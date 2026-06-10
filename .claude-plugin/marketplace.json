@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "circleci-public-skills",
+  "description": "Official CircleCI skills for Claude Code — CI/CD configuration, build debugging, test optimization, and CircleCI onboarding",
+  "owner": {
+    "name": "CircleCI",
+    "email": "michaelwebster@circleci.com"
+  },
+  "plugins": [
+    {
+      "name": "circleci",
+      "description": "Build, test, and deploy any application with CircleCI. Includes skills for config management, build debugging, smarter testing, and onboarding new projects to CircleCI.",
+      "version": "1.0.0",
+      "author": {
+        "name": "CircleCI",
+        "url": "https://circleci.com"
+      },
+      "source": "./plugins/circleci",
+      "category": "development",
+      "homepage": "https://github.com/circleci-public/skills"
+    }
+  ]
+}
