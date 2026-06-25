@@ -11,7 +11,7 @@ Use this skill to improve CircleCI performance and stability without changing pr
 
 Read `references/cache-optimization.md` when the request involves `save_cache`, `restore_cache`, `persist_to_workspace`, `attach_workspace`, cache key design, dependency caching, lockfiles, or complaints about low cache hit rates, oversized caches, or wasted persistence steps.
 Read `references/persisting-data.md` when the request involves choosing between caches, workspaces, and artifacts, or when data is being moved between jobs inefficiently.
-Read `references/test-results-and-splitting.md` when the request involves slow test jobs, parallelism, flaky test visibility, missing JUnit XML, or `circleci tests run`.
+Read `references/test-results.md` when the request involves slow test jobs, parallelism, tests timings, or missing JUnit XML.
 Read `references/patterns.md` when the request involves approvals, branch/tag filters, schedules, deploy flow structure, or environment promotion patterns.
 
 ## Inputs To Gather
