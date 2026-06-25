@@ -33,7 +33,7 @@ Sources:
 - Prefer manual investigation first when the first occurrence is ambiguous.
 - Recommend automatic step reruns only for steps with a well-understood transient failure pattern.
 - Recommend automatic workflow reruns only when rerunning failed jobs is materially cheaper than re-executing the entire workflow and the failure mode is plausibly temporary.
-- For flaky tests, prefer `circleci tests run` plus rerun failed tests over rerunning entire workflows.
+- For flaky tests, prefer `circleci run testsuite` plus rerun workflow from failed or auto rerun failed tests over rerunning entire workflows.
 
 ## Guardrails
 
@@ -52,6 +52,6 @@ Sources:
 ## Common Fixes To Suggest
 
 - Add low-count step reruns for a flaky external dependency fetch step.
-- Use rerun failed tests for known flaky test suites once JUnit metadata and `circleci tests run` are configured.
+- Use rerun workflow from failed or auto rerun failed tests for known flaky test suites once JUnit metadata and `circleci run testsuite` are configured.
 - Remove retries and fix environment parity when failures are deterministic.
 - Report external outages clearly when the pipeline itself is healthy but a dependency is not.
