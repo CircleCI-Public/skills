@@ -12,9 +12,10 @@ The actual plugin in `plugins/circleci` is compatible with existing codex market
 Skills include:
 - general CircleCI build debugging
 - usage of the chunk cli and cloud based modes
-- circleci cli usage
+- the circleci CLI day-to-day developer workflow — validate, push, `run watch`, read failing logs/tests, rerun
 - circleci config management and optimization
 - CircleCI Smarter Testing (testsuite) onboarding and `test-suites.yml` setup
+- guided onboarding of a new project to CircleCI (incl. org/pipeline types, `project follow`, central config)
 
 ## Manual eval runs
 

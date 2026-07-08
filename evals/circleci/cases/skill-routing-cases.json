@@ -23,7 +23,15 @@
         "pipeline list",
         "rerun workflow",
         "trigger pipeline",
-        "validate config"
+        "validate config",
+        "watch the run",
+        "run watch",
+        "build status",
+        "pipeline status",
+        "download artifacts",
+        "job output",
+        "failing tests",
+        "re-trigger"
       ]
     },
     "circleci-config": {
@@ -59,6 +67,16 @@
         "dynamic test splitting",
         "auto rerun failed tests"
       ]
+    },
+    "onboarding": {
+      "phrases": [
+        "onboard my repo",
+        "onboard to circleci",
+        "set up circleci",
+        "connect my repo to circleci",
+        "get started with circleci",
+        "create a circleci project"
+      ]
     }
   },
   "cases": [
@@ -80,6 +98,18 @@
     },
     {
       "prompt": "Use $circleci-cli to rerun the failed workflow from the command line.",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "After I push, watch the run on my current branch and tell me when it finishes.",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "From the terminal, check my pipeline status and re-trigger the latest run.",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "Download artifacts from my last CircleCI job and list the failing tests.",
       "expected": "circleci-cli"
     },
     {
@@ -121,6 +151,18 @@
     {
       "prompt": "We want dynamic test splitting and test impact analysis for our testsuite in CircleCI.",
       "expected": "circleci-smarter-testing"
+    },
+    {
+      "prompt": "I have a new repo and want to get started with CircleCI — walk me through connecting it.",
+      "expected": "onboarding"
+    },
+    {
+      "prompt": "Onboard my repo to CircleCI and set up a pipeline and trigger.",
+      "expected": "onboarding"
+    },
+    {
+      "prompt": "Use $onboarding to connect my new repository to CircleCI.",
+      "expected": "onboarding"
     },
     {
       "prompt": "Optimize our Jest unit tests for readability and maintainability in the codebase.",
