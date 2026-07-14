@@ -11,6 +11,14 @@ structured input rather than asking in prose — this keeps the flow crisp and
 unambiguous. Run CLI commands to verify state before asking questions you can
 answer yourself. Skip stages that are already complete.
 
+> This flow assumes the common path: a **GitHub org with the CircleCI GitHub App
+> installed**, one repo, config at `.circleci/config.yml`. When the situation
+> doesn't fit — a Bitbucket (`bb/`) or OAuth-only org, a standalone
+> `circleci/<uuid>` org, central config, or a project that looks set up but shows
+> an empty Pipelines page — read `references/org-and-pipeline-types.md`. It
+> explains org type vs pipeline type, the `project follow` webhook trap, central
+> config, URL-orb allow-listing, and CLI teardown limits.
+
 ---
 
 ## Stage 0: Check prerequisites
@@ -138,6 +146,12 @@ circleci project get --json   # verify and capture project UUID
 
 Save the project `slug` (e.g. `gh/myorg/myrepo`) and `id` (UUID).
 
+> **Heads-up for OAuth orgs (`gh/`, `bb/`):** `project create` alone adds no
+> webhook and no follower, so the project shows "needs to be set up" with an
+> empty Pipelines page until you run `circleci project follow --project <slug>`.
+> Confirm with `circleci project list` (followed projects only). See
+> `references/org-and-pipeline-types.md` for the full explanation.
+
 ---
 
 ## Stage 5: Pipeline definition + trigger
@@ -170,6 +184,9 @@ Map the choice to `--event-preset`:
 - "Pull requests only" → `only-open-prs`
 - "Default branch only" → `default-branch-pushes`
 - "All pushes" → `all-pushes`
+
+(Many more presets exist — tags-only, merge-queue, PR-comment, etc. See
+`references/org-and-pipeline-types.md`.)
 
 Then immediately (no further confirmation needed):
 
@@ -311,3 +328,7 @@ Then help with whatever they select.
 - **Use `--json`** on all commands that return IDs so values are easy to extract.
 - **On failure**, surface the raw error, diagnose it, and propose a fix before
   retrying. Auth errors → `circleci auth login`. 404s → check project slug.
+- **For Bitbucket/OAuth-only/standalone orgs, central config, URL orbs, or
+  teardown**, consult `references/org-and-pipeline-types.md`.
+- Once the project is running, day-to-day operation (watch a run, read failing
+  logs/tests, rerun) is the **circleci-cli** skill.

@@ -31,6 +31,7 @@
     "defaultPrompt": [
       "Review the CircleCI configuration for this project and suggest improvements",
       "Diagnose and fix build failures for the current branch",
+      "Watch the CircleCI run for my current branch and report the results",
       "Setup the Chunk cli for this project",
       "Setup CircleCI Smarter Testing for running tests in this project",
       "Onboard my project to CircleCI"

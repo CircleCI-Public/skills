@@ -19,6 +19,18 @@
       "expected_skill": "circleci-cli"
     },
     {
+      "id": "dev-workflow-implicit-smoke",
+      "purpose": "Validate day-to-day intent (watch a run after push) routes to circleci-cli without an explicit skill name.",
+      "prompt": "After I push, watch the CircleCI run on my current branch and report the results.",
+      "expected_skill": "circleci-cli"
+    },
+    {
+      "id": "onboarding-explicit-smoke",
+      "purpose": "Validate explicit skill mention routes to onboarding in a real codex run.",
+      "prompt": "Use $onboarding to connect my new repo to CircleCI and get CI running.",
+      "expected_skill": "onboarding"
+    },
+    {
       "id": "smarter-testing-explicit-smoke",
       "purpose": "Validate explicit skill mention routes to circleci-smarter-testing in a real codex run.",
       "prompt": "Use $circleci-smarter-testing to outline testsuite setup with discover, run, and doctor for this repo.",
