@@ -16,8 +16,9 @@ Doctor is self-documenting. Its `action_items` tell you exactly what's wrong and
 1. **No config found** — doctor's action item includes a starter `test-suites.yml` example. Create `.circleci/test-suites.yml` using it, adapted to the project's real test runner and commands.
 2. **A check fails** (invalid config, `discover` or `run` command errors, JUnit atoms not matching, missing `file-mapper`, etc.) — apply exactly what the action item's `content` says, then run doctor again.
    - "JUnit output is missing results for some test atoms" often means the reporter isn't emitting a `file` (or otherwise matchable) attribute per test case, so doctor can't line up atoms to results. Check the runner's JUnit reporter options for a flag to include the file path. For example, Jest's `jest-junit` needs `JEST_JUNIT_ADD_FILE_ATTRIBUTE=true`; pytest needs `--override-ini=junit_family=xunit1` (or a `file="..."` attribute is otherwise absent from `--junit-xml` output).
-3. **All checks pass, `action_items` is empty** — doctor's `next_steps` lists optional features (test impact analysis, dynamic test splitting, auto rerun, wiring into CI config) each with its own YAML snippet. Apply only the ones the user asked for, then run doctor again to confirm.
-4. Repeat until doctor is green and, if requested, the optional features are in place.
+3. **All checks pass, `action_items` is empty** — doctor's `next_steps` lists optional features (test impact analysis, dynamic test splitting, auto rerun, wiring into CI config) each with its own YAML snippet. Don't apply any of these yet if the user didn't ask for them.
+4. Repeat until doctor is green.
+5. Once green, stop and ask the user whether to set up any of the optional features doctor listed in `next_steps` (test impact analysis, dynamic test splitting, auto rerun, wiring into CI config) — summarize the options doctor offered. Only apply the ones they choose, then run doctor again after each to confirm, per its snippet.
 
 ## Guardrails
 
