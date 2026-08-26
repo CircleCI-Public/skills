@@ -58,7 +58,7 @@
         "chunk auth"
       ]
     },
-    "circleci-smarter-testing": {
+    "circleci-smarter-testing-onboarding": {
       "phrases": [
         "smarter testing",
         "testsuite",
@@ -141,16 +141,16 @@
       "expected": "chunk"
     },
     {
-      "prompt": "Use $circleci-smarter-testing to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
-      "expected": "circleci-smarter-testing"
+      "prompt": "Use $circleci-smarter-testing-onboarding to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "Help us onboard this repo to CircleCI Smarter Testing with discover and run commands and doctor validation.",
-      "expected": "circleci-smarter-testing"
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "We want dynamic test splitting and test impact analysis for our testsuite in CircleCI.",
-      "expected": "circleci-smarter-testing"
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "I have a new repo and want to get started with CircleCI — walk me through connecting it.",

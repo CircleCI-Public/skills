@@ -32,14 +32,14 @@
     },
     {
       "id": "smarter-testing-explicit",
-      "prompt": "Use $circleci-smarter-testing to add testsuite with discover, run, junit outputs, and doctor checks for this repository.",
-      "expected_skill": "circleci-smarter-testing",
+      "prompt": "Use $circleci-smarter-testing-onboarding to add testsuite with discover, run, junit outputs, and doctor checks for this repository.",
+      "expected_skill": "circleci-smarter-testing-onboarding",
       "trigger_type": "explicit"
     },
     {
       "id": "smarter-testing-implicit",
       "prompt": "We are migrating to CircleCI Smarter Testing and need test-suites.yml plus config.yml wiring for testsuite.",
-      "expected_skill": "circleci-smarter-testing",
+      "expected_skill": "circleci-smarter-testing-onboarding",
       "trigger_type": "implicit"
     }
   ]

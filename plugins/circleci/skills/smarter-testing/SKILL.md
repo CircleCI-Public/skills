@@ -1,5 +1,5 @@
 ---
-name: circleci-smarter-testing
+name: circleci-smarter-testing-onboarding
 description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/test-suites.yml`, driven entirely by `circleci testsuite doctor`. Use for Smarter Testing, testsuite, test-suites YAML, test impact analysis, dynamic test splitting, auto rerun failed tests, or migrating raw test commands.
 ---
 
@@ -8,7 +8,7 @@ description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/t
 Run this first, before anything else, even if `.circleci/test-suites.yml` doesn't exist yet:
 
 ```shell
-circleci testsuite doctor "<suite name>"
+circleci testsuite doctor "<suite name>" --json
 ```
 
 Doctor is self-documenting. Its `action_items` tell you exactly what's wrong and how to fix it (including YAML snippets), and its `next_steps` tell you what to do next once everything passes. Read its output and follow it:
