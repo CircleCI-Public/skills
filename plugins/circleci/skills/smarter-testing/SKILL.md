@@ -1,80 +1,32 @@
 ---
 name: circleci-smarter-testing
-description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/test-suites.yml`, config wiring, `circleci testsuite run`, and `circleci testsuite doctor` until checks pass. Use for Smarter Testing, testsuite, test-suites YAML, test impact analysis, dynamic test splitting, auto rerun failed tests, or migrating raw test commands.
+description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/test-suites.yml`, driven entirely by `circleci testsuite doctor`. Use for Smarter Testing, testsuite, test-suites YAML, test impact analysis, dynamic test splitting, auto rerun failed tests, or migrating raw test commands.
 ---
 
 # CircleCI Smarter Testing
 
-## Overview
+Run this first, before anything else, even if `.circleci/test-suites.yml` doesn't exist yet:
 
-**Beta** ([Discuss](https://discuss.circleci.com/t/product-launch-smarter-testing-is-now-in-beta/54497)). Create or adjust `.circleci/test-suites.yml`, wire it into CI, and validate with the `doctor` command until checks pass. Let doctor diagnose YAML, command, JUnit, and testsuite errors before adding extra guidance.
-
-## Doctor command (required)
-
-When iterating with the `doctor` command, the agent **must always** run this exact command (substitute the suite name only):
-
-```bash
-$ circleci testsuite doctor "<suite name>" --json
+```shell
+circleci testsuite doctor "<suite name>"
 ```
 
-Example output:
+Doctor is self-documenting. Its `action_items` tell you exactly what's wrong and how to fix it (including YAML snippets), and its `next_steps` tell you what to do next once everything passes. Read its output and follow it:
 
-```json
-{
-  "checks": [
-	{
-	  "name": "< check name >",
-	  "state": "< success | skipped | failed >"
-	}
-  ],
-  "action_items": [
-	{
-	  "title": "< what happened >",
-	  "content": "< advice on how to fix the problem >"
-	}
-  ],
-  "next_steps": [
-	{
-	  "title": "< next step >",
-	  "content": "< suggestion for the next thing to configure >"
-    }
-  ]
-}
-```
-
-Do not modify this command: no pipes, `tail`, redirects, backgrounding, or truncation.
-
-**Scope:** testsuite setup and validation. Primary doc: [Getting started](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/).
-
-**Lazy references:** read only what the task needs—do not load every reference file up front.
-
-- CI / `store_test_results` → [references/ci-and-junit.md](references/ci-and-junit.md)
-
-## Inputs To Gather
-
-- Runner, test root, existing `.circleci/config.yml`
-- Hand off: **`circleci-cli`** (install/auth/extension) | **`circleci-config`** (JUnit/test results) | **`circleci-builds`** (CI fails after doctor-clean config)
-
-## Workflow
-
-1. **Local vs CI** — Local needs [CLI](https://cli.circleci.com/) + testsuite extension (`circleci extension install testsuite`). CI uses `circleci run testsuite` on executors + [ci-and-junit.md](references/ci-and-junit.md).
-2. **Inspect** — runner, layout, existing CI; reuse documented test commands; run testsuite from the test root (no `cd` in YAML).
-3. **Doctor** — run the exact doctor command above; apply its advice; repeat until pass.
-4. **Next steps** — Ask to configure next steps from the doctor command output. Run the doctor command after each.
+1. **No config found** — doctor's action item includes a starter `test-suites.yml` example. Create `.circleci/test-suites.yml` using it, adapted to the project's real test runner and commands.
+2. **A check fails** (invalid config, `discover` or `run` command errors, JUnit atoms not matching, missing `file-mapper`, etc.) — apply exactly what the action item's `content` says, then run doctor again.
+   - "JUnit output is missing results for some test atoms" often means the reporter isn't emitting a `file` (or otherwise matchable) attribute per test case, so doctor can't line up atoms to results. Check the runner's JUnit reporter options for a flag to include the file path. For example, Jest's `jest-junit` needs `JEST_JUNIT_ADD_FILE_ATTRIBUTE=true`; pytest needs `--override-ini=junit_family=xunit1` (or a `file="..."` attribute is otherwise absent from `--junit-xml` output).
+3. **All checks pass, `action_items` is empty** — doctor's `next_steps` lists optional features (test impact analysis, dynamic test splitting, auto rerun, wiring into CI config) each with its own YAML snippet. Apply only the ones the user asked for, then run doctor again to confirm.
+4. Repeat until doctor is green and, if requested, the optional features are in place.
 
 ## Guardrails
 
-- Never skip doctor after editing `test-suites.yml`.
-- No secrets in YAML—use contexts/env vars; document variable names only.
-- Do not swap a working testsuite for legacy `circleci tests split` / `circleci tests run`.
-
-## Reference map
-
-- [ci-and-junit.md](references/ci-and-junit.md) — full `config.yml`, JUnit directory upload.
+- `circleci testsuite doctor "<suite name>"` is the only command that executes tests during setup and iteration. Never run the project's raw test command (`npm test`, `pytest`, `go test`, `rspec`, etc.) or the YAML's `discover`/`run` commands directly to validate — always go through doctor.
+- The only exception is `circleci testsuite run "<suite name>" --analyze-tests=impacted`, and only when a doctor `next_steps` item explicitly asks for it to seed initial test impact analysis data.
+- No secrets in `test-suites.yml` — use contexts/env vars. Don't commit local impact data under `.circleci/`.
+- Don't replace a working testsuite with legacy `circleci tests split`/`circleci tests run` unless asked to migrate.
+- Hand off CLI install/auth issues to `circleci-cli`, legacy JUnit/timings-split work to `circleci-config`, and CI failures after a doctor-clean config to `circleci-builds`.
 
 ## Output Contract
 
-Provide:
-
-1. Runner, working directory, files changed, commands run (`doctor` and follow-ups).
-2. What to commit and open items (beta access, blocked prerequisites).
+Remove extraneous files created during setup. Report the runner, files changed, the final doctor output, and any blocked prerequisites.
