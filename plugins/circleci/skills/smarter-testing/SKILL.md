@@ -1,33 +1,46 @@
 ---
-name: circleci-smarter-testing-onboarding
-description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/test-suites.yml`, driven entirely by `circleci testsuite doctor`. Use for Smarter Testing, testsuite, test-suites YAML, test impact analysis, dynamic test splitting, auto rerun failed tests, or migrating raw test commands.
+name: circleci-smarter-testing
+description: Enable CircleCI Smarter Testing features (test impact analysis, dynamic test splitting, auto-rerun failed tests) on top of an existing testsuite, driven by `circleci testsuite doctor`. Use for test impact analysis, dynamic test splitting, auto-rerun, or "smarter testing". Requires `.circleci/test-suites.yml` to already exist — if it doesn't, use the circleci-testsuite skill first.
 ---
 
 # CircleCI Smarter Testing
 
-Run this first, before anything else, even if `.circleci/test-suites.yml` doesn't exist yet:
+These features may require a paid plan or be in beta — verify current availability and pricing before promising them to the user.
+
+Builds on top of testsuite. Ask the user which of these they want (don't assume all three):
+
+- **Test impact analysis** — run only the tests affected by a change.
+- **Dynamic test splitting** — evenly distribute tests across parallel nodes.
+- **Auto-rerun failed tests** — automatically retry failures in the same step.
+
+Start with:
 
 ```shell
 circleci testsuite doctor "<suite name>" --json
 ```
 
-Doctor is self-documenting. Its `action_items` tell you exactly what's wrong and how to fix it (including YAML snippets), and its `next_steps` tell you what to do next once everything passes. Read its output and follow it:
+If `.circleci/test-suites.yml` doesn't exist, or `checks` don't all pass, stop and send the user to `circleci-testsuite` first — never enable these options against a suite that isn't doctor-clean.
 
-1. **No config found** — doctor's action item includes a starter `test-suites.yml` example. Create `.circleci/test-suites.yml` using it, adapted to the project's real test runner and commands.
-2. **A check fails** (invalid config, `discover` or `run` command errors, JUnit atoms not matching, missing `file-mapper`, etc.) — apply exactly what the action item's `content` says, then run doctor again.
-   - "JUnit output is missing results for some test atoms" often means the reporter isn't emitting a `file` (or otherwise matchable) attribute per test case, so doctor can't line up atoms to results. Check the runner's JUnit reporter options for a flag to include the file path. For example, Jest's `jest-junit` needs `JEST_JUNIT_ADD_FILE_ATTRIBUTE=true`; pytest needs `--override-ini=junit_family=xunit1` (or a `file="..."` attribute is otherwise absent from `--junit-xml` output).
-3. **All checks pass, `action_items` is empty** — doctor's `next_steps` lists optional features (test impact analysis, dynamic test splitting, auto rerun, wiring into CI config) each with its own YAML snippet. Don't apply any of these yet if the user didn't ask for them.
-4. Repeat until doctor is green.
-5. Once green, stop and ask the user whether to set up any of the optional features doctor listed in `next_steps` (test impact analysis, dynamic test splitting, auto rerun, wiring into CI config) — summarize the options doctor offered. Only apply the ones they choose, then run doctor again after each to confirm, per its snippet.
+**Set `options: store-test-results: true`** alongside whichever features the user enables, if it isn't already set — it's a separate recommended setting, required for some feature to work. It replaces any classic `store_test_results` job step. Rerun doctor to confirm.
+
+For each feature the user wants:
+
+1. Apply the `options:` snippet from doctor's `next_steps` (`test-impact-analysis: true`, `dynamic-test-splitting: true`, `max-auto-rerun: <0-10>`).
+2. Rerun doctor — fix whatever it flags (e.g. missing `file-mapper` when atoms aren't files, missing job `parallelism` for splitting) and repeat until clean.
+3. For test impact analysis specifically, once clean, seed initial data once — the one legitimate non-doctor use of `testsuite run` during setup:
+   ```shell
+   circleci testsuite run "<suite name>" --analyze-tests=impacted
+   ```
+
+Once test impact analysis is enabled and seeded, recommend the user replace their everyday local test command (`npm test`, `pytest`, `go test`, etc.) with `circleci testsuite run "<suite name>" --local` — it uses locally stored impact data, so local runs select only the tests impacted by uncommitted changes, same as CI.
 
 ## Guardrails
 
-- `circleci testsuite doctor "<suite name>"` is the only command that executes tests during setup and iteration. Never run the project's raw test command (`npm test`, `pytest`, `go test`, `rspec`, etc.) or the YAML's `discover`/`run` commands directly to validate — always go through doctor.
-- The only exception is `circleci testsuite run "<suite name>" --analyze-tests=impacted`, and only when a doctor `next_steps` item explicitly asks for it to seed initial test impact analysis data.
+- Only enable the features the user actually asked for — don't turn on test impact analysis, dynamic test splitting, or auto-rerun speculatively.
+- `circleci testsuite doctor "<suite name>"` is the only command that executes tests during setup, except the one-time seed step and the `--local` dev-loop recommendation above.
 - No secrets in `test-suites.yml` — use contexts/env vars. Don't commit local impact data under `.circleci/`.
-- Don't replace a working testsuite with legacy `circleci tests split`/`circleci tests run` unless asked to migrate.
-- Hand off CLI install/auth issues to `circleci-cli`, legacy JUnit/timings-split work to `circleci-config`, and CI failures after a doctor-clean config to `circleci-builds`.
+- Hand off CLI install/auth issues to `circleci-cli`, other config/caching/workspace work to `circleci-config`, and CI failures after a doctor-clean config to `circleci-builds`.
 
 ## Output Contract
 
-Remove extraneous files created during setup. Report the runner, files changed, the final doctor output, and any blocked prerequisites.
+Remove extraneous files created during setup. Report which features were enabled, files changed, the final doctor output, and any blocked prerequisites.

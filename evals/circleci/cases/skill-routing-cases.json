@@ -58,11 +58,19 @@
         "chunk auth"
       ]
     },
-    "circleci-smarter-testing-onboarding": {
+    "circleci-testsuite": {
       "phrases": [
-        "smarter testing",
         "testsuite",
         "test-suites.yml",
+        "discover command",
+        "run command",
+        "migrate test command",
+        "circleci tests split"
+      ]
+    },
+    "circleci-smarter-testing": {
+      "phrases": [
+        "smarter testing",
         "test impact analysis",
         "dynamic test splitting",
         "auto rerun failed tests"
@@ -141,16 +149,24 @@
       "expected": "chunk"
     },
     {
-      "prompt": "Use $circleci-smarter-testing-onboarding to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
-      "expected": "circleci-smarter-testing-onboarding"
+      "prompt": "Use $circleci-testsuite to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
+      "expected": "circleci-testsuite"
     },
     {
-      "prompt": "Help us onboard this repo to CircleCI Smarter Testing with discover and run commands and doctor validation.",
-      "expected": "circleci-smarter-testing-onboarding"
+      "prompt": "Help us onboard this repo onto CircleCI's testsuite with discover and run commands and doctor validation.",
+      "expected": "circleci-testsuite"
+    },
+    {
+      "prompt": "Migrate our old circleci tests split test step over to the new testsuite command.",
+      "expected": "circleci-testsuite"
     },
     {
       "prompt": "We want dynamic test splitting and test impact analysis for our testsuite in CircleCI.",
-      "expected": "circleci-smarter-testing-onboarding"
+      "expected": "circleci-smarter-testing"
+    },
+    {
+      "prompt": "Set up CircleCI Smarter Testing's auto rerun failed tests feature for our testsuite.",
+      "expected": "circleci-smarter-testing"
     },
     {
       "prompt": "I have a new repo and want to get started with CircleCI — walk me through connecting it.",
