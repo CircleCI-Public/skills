@@ -1,80 +1,46 @@
 ---
 name: circleci-smarter-testing
-description: Onboard onto CircleCI Smarter Testing (testsuite) with `.circleci/test-suites.yml`, config wiring, `circleci testsuite run`, and `circleci testsuite doctor` until checks pass. Use for Smarter Testing, testsuite, test-suites YAML, test impact analysis, dynamic test splitting, auto rerun failed tests, or migrating raw test commands.
+description: Enable CircleCI Smarter Testing features (test impact analysis, dynamic test splitting, auto-rerun failed tests) on top of an existing testsuite, driven by `circleci testsuite doctor`. Use for test impact analysis, dynamic test splitting, auto-rerun, or "smarter testing". Requires `.circleci/test-suites.yml` to already exist — if it doesn't, use the circleci-testsuite skill first.
 ---
 
 # CircleCI Smarter Testing
 
-## Overview
+These features may require a paid plan or be in beta — verify current availability and pricing before promising them to the user.
 
-**Beta** ([Discuss](https://discuss.circleci.com/t/product-launch-smarter-testing-is-now-in-beta/54497)). Create or adjust `.circleci/test-suites.yml`, wire it into CI, and validate with the `doctor` command until checks pass. Let doctor diagnose YAML, command, JUnit, and testsuite errors before adding extra guidance.
+Builds on top of testsuite. Ask the user which of these they want (don't assume all three):
 
-## Doctor command (required)
+- **Test impact analysis** — run only the tests affected by a change.
+- **Dynamic test splitting** — evenly distribute tests across parallel nodes.
+- **Auto-rerun failed tests** — automatically retry failures in the same step.
 
-When iterating with the `doctor` command, the agent **must always** run this exact command (substitute the suite name only):
+Start with:
 
-```bash
-$ circleci testsuite doctor "<suite name>" --json
+```shell
+circleci testsuite doctor "<suite name>" --json
 ```
 
-Example output:
+If `.circleci/test-suites.yml` doesn't exist, or `checks` don't all pass, stop and send the user to `circleci-testsuite` first — never enable these options against a suite that isn't doctor-clean.
 
-```json
-{
-  "checks": [
-	{
-	  "name": "< check name >",
-	  "state": "< success | skipped | failed >"
-	}
-  ],
-  "action_items": [
-	{
-	  "title": "< what happened >",
-	  "content": "< advice on how to fix the problem >"
-	}
-  ],
-  "next_steps": [
-	{
-	  "title": "< next step >",
-	  "content": "< suggestion for the next thing to configure >"
-    }
-  ]
-}
-```
+**Set `options: store-test-results: true`** alongside whichever features the user enables, if it isn't already set — it's a separate recommended setting, required for some feature to work. It replaces any classic `store_test_results` job step. Rerun doctor to confirm.
 
-Do not modify this command: no pipes, `tail`, redirects, backgrounding, or truncation.
+For each feature the user wants:
 
-**Scope:** testsuite setup and validation. Primary doc: [Getting started](https://circleci.com/docs/guides/test/getting-started-with-smarter-testing/).
+1. Apply the `options:` snippet from doctor's `next_steps` (`test-impact-analysis: true`, `dynamic-test-splitting: true`, `max-auto-rerun: <0-10>`).
+2. Rerun doctor — fix whatever it flags (e.g. missing `file-mapper` when atoms aren't files, missing job `parallelism` for splitting) and repeat until clean.
+3. For test impact analysis specifically, once clean, seed initial data once — the one legitimate non-doctor use of `testsuite run` during setup:
+   ```shell
+   circleci testsuite run "<suite name>" --analyze-tests=impacted
+   ```
 
-**Lazy references:** read only what the task needs—do not load every reference file up front.
-
-- CI / `store_test_results` → [references/ci-and-junit.md](references/ci-and-junit.md)
-
-## Inputs To Gather
-
-- Runner, test root, existing `.circleci/config.yml`
-- Hand off: **`circleci-cli`** (install/auth/extension) | **`circleci-config`** (JUnit/test results) | **`circleci-builds`** (CI fails after doctor-clean config)
-
-## Workflow
-
-1. **Local vs CI** — Local needs [CLI](https://cli.circleci.com/) + testsuite extension (`circleci extension install testsuite`). CI uses `circleci run testsuite` on executors + [ci-and-junit.md](references/ci-and-junit.md).
-2. **Inspect** — runner, layout, existing CI; reuse documented test commands; run testsuite from the test root (no `cd` in YAML).
-3. **Doctor** — run the exact doctor command above; apply its advice; repeat until pass.
-4. **Next steps** — Ask to configure next steps from the doctor command output. Run the doctor command after each.
+Once test impact analysis is enabled and seeded, recommend the user replace their everyday local test command (`npm test`, `pytest`, `go test`, etc.) with `circleci testsuite run "<suite name>" --local` — it uses locally stored impact data, so local runs select only the tests impacted by uncommitted changes, same as CI.
 
 ## Guardrails
 
-- Never skip doctor after editing `test-suites.yml`.
-- No secrets in YAML—use contexts/env vars; document variable names only.
-- Do not swap a working testsuite for legacy `circleci tests split` / `circleci tests run`.
-
-## Reference map
-
-- [ci-and-junit.md](references/ci-and-junit.md) — full `config.yml`, JUnit directory upload.
+- Only enable the features the user actually asked for — don't turn on test impact analysis, dynamic test splitting, or auto-rerun speculatively.
+- `circleci testsuite doctor "<suite name>"` is the only command that executes tests during setup, except the one-time seed step and the `--local` dev-loop recommendation above.
+- No secrets in `test-suites.yml` — use contexts/env vars. Don't commit local impact data under `.circleci/`.
+- Hand off CLI install/auth issues to `circleci-cli`, other config/caching/workspace work to `circleci-config`, and CI failures after a doctor-clean config to `circleci-builds`.
 
 ## Output Contract
 
-Provide:
-
-1. Runner, working directory, files changed, commands run (`doctor` and follow-ups).
-2. What to commit and open items (beta access, blocked prerequisites).
+Remove extraneous files created during setup. Report which features were enabled, files changed, the final doctor output, and any blocked prerequisites.

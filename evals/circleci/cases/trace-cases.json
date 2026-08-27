@@ -31,14 +31,20 @@
       "trigger_type": "negative"
     },
     {
-      "id": "smarter-testing-explicit",
-      "prompt": "Use $circleci-smarter-testing to add testsuite with discover, run, junit outputs, and doctor checks for this repository.",
-      "expected_skill": "circleci-smarter-testing",
+      "id": "testsuite-explicit",
+      "prompt": "Use $circleci-testsuite to add testsuite with discover, run, junit outputs, and doctor checks for this repository.",
+      "expected_skill": "circleci-testsuite",
       "trigger_type": "explicit"
     },
     {
+      "id": "testsuite-implicit",
+      "prompt": "We are migrating our raw test command to CircleCI's testsuite and need test-suites.yml plus config.yml wiring.",
+      "expected_skill": "circleci-testsuite",
+      "trigger_type": "implicit"
+    },
+    {
       "id": "smarter-testing-implicit",
-      "prompt": "We are migrating to CircleCI Smarter Testing and need test-suites.yml plus config.yml wiring for testsuite.",
+      "prompt": "We already have a testsuite set up and now want CircleCI Smarter Testing's test impact analysis and dynamic test splitting.",
       "expected_skill": "circleci-smarter-testing",
       "trigger_type": "implicit"
     }

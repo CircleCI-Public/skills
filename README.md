@@ -37,7 +37,8 @@ Routing case purpose (`evals/circleci/cases/skill-routing-cases.json`):
 - `circleci-cli` cases: ensure CLI/auth/rerun/command-line prompts route to `circleci-cli` (explicit + implicit).
 - `circleci-config` cases: ensure `.circleci/config.yml`, caching, workspace, and runtime optimization prompts route to `circleci-config` (explicit + implicit).
 - `chunk` cases: ensure Chunk setup and `chunk-cli` prompts route to `chunk` (explicit + implicit).
-- `circleci-smarter-testing` cases: ensure Smarter Testing, testsuite, and `test-suites.yml` prompts route to `circleci-smarter-testing` (explicit + implicit).
+- `circleci-testsuite` cases: ensure testsuite, `test-suites.yml`, and legacy test-command migration prompts route to `circleci-testsuite` (explicit + implicit).
+- `circleci-smarter-testing` cases: ensure Smarter Testing, test impact analysis, and dynamic test splitting prompts route to `circleci-smarter-testing` (explicit + implicit).
 - negative-control cases: ensure non-CircleCI prompts route to `null`.
 
 ### 2) Local invocation smoke (codex `--json`, not in CI)
@@ -62,6 +63,7 @@ Invocation smoke case purpose (`evals/circleci/cases/skill-invocation-smoke-case
 - `builds-explicit-smoke`: validate explicit `$circleci-builds` prompt selects `circleci-builds`.
 - `chunk-explicit-smoke`: validate explicit `$chunk` prompt selects `chunk`.
 - `cli-implicit-smoke`: validate CLI intent prompt selects `circleci-cli` without explicit skill mention.
+- `testsuite-explicit-smoke`: validate explicit `$circleci-testsuite` prompt selects `circleci-testsuite`.
 - `smarter-testing-explicit-smoke`: validate explicit `$circleci-smarter-testing` prompt selects `circleci-smarter-testing`.
 - `negative-control-smoke`: validate unrelated prompt reports `none`.
 
@@ -74,6 +76,7 @@ evals/circleci/scripts/run_trace_capture_evals_local.sh
 Trace case purpose (`evals/circleci/cases/trace-cases.json`):
 - validate codex capture preflight and JSONL artifact generation for explicit and implicit prompts.
 - validate grading behavior for expected skill mention and negative controls.
-- `smarter-testing-explicit` / `smarter-testing-implicit`: validate `$circleci-smarter-testing` and Smarter Testing migration prompts.
+- `testsuite-explicit` / `testsuite-implicit`: validate `$circleci-testsuite` and legacy test-command migration prompts.
+- `smarter-testing-implicit`: validate CircleCI Smarter Testing (test impact analysis, dynamic test splitting) prompts route to `circleci-smarter-testing`.
 
 If codex preflight fails with a network error, verify that `codex exec` can reach OpenAI endpoints from your environment.
