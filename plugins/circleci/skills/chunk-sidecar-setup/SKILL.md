@@ -1,26 +1,6 @@
 ---
 name: chunk-sidecar-setup
 description: Use when the user says "set up chunk sidecar", "onboard to chunk", "first time sidecar", "configure sidecar from scratch", "walk me through sidecar setup", "set up smarter testing from scratch", "sidecar onboarding", "new sidecar environment", or "I've never used a chunk sidecar before". Also invoked by the chunk-sidecar skill when first-time setup is selected. This is the interactive onboarding wizard — it covers auth, orgID, sidecar creation, dependency installation, snapshot creation, and handoff to the dev loop.
-version: 1.0.0
-allowed-tools:
-  - Bash(chunk --version)
-  - Bash(chunk auth status)
-  - Bash(chunk auth login)
-  - Bash(chunk auth login --no-browser)
-  - Bash(chunk config set:*)
-  - Bash(chunk sidecar:*)
-  - Bash(chunk validate:*)
-  - Bash(cat .chunk/config.json)
-  - Bash(cat .chunk/sidecar.json)
-  - Bash(ls .circleci/test-suites.yml)
-  - Bash(test -n*)
-  - Bash(git remote get-url origin)
-  - Bash(basename*)
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
 ---
 
 # Chunk Sidecar Setup (Onboarding Wizard)

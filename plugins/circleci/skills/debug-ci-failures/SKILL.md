@@ -5,20 +5,6 @@ description: >-
   Use when the user says "debug CI", "why is CI failing", "fix CI failures",
   "find flaky tests", "what broke in CI", "check CircleCI", or asks about
   failing pipelines or build errors.
-version: 1.0.0
-allowed-tools:
-  - ToolSearch
-  - mcp__circleci-mcp-server__get_latest_pipeline_status
-  - mcp__circleci-mcp-server__get_build_failure_logs
-  - mcp__circleci-mcp-server__find_flaky_tests
-  - mcp__circleci-mcp-server__get_job_test_results
-  - mcp__circleci-mcp-server__list_followed_projects
-  - mcp__circleci-mcp-server__rerun_workflow
-  - Bash(git remote get-url origin)
-  - Bash(git branch --show-current)
-  - Read
-  - Grep
-  - Glob
 ---
 
 # Debug CircleCI CI Failures

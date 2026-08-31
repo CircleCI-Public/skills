@@ -1,24 +1,6 @@
 ---
 name: chunk-sidecar
 description: Use when the user says "validate on the sidecar", "run tests on the sidecar", "sync to sidecar", "sidecar dev loop", "check this on the sidecar", "validate remotely", "scaffold test-suites.yml", "set up smarter testing", "write .circleci/test-suites.yml", "run smarter testing doctor", or "diagnose smarter testing", or when you have made edits and want to verify them on a remote `chunk` sidecar instead of running locally. Also covers creating sidecars, snapshotting a configured environment, customizing the sidecar image via `chunk sidecar`, and scaffolding `.circleci/test-suites.yml` for CircleCI Smarter Testing.
-version: 2.1.0
-allowed-tools:
-  - Bash(chunk --version)
-  - Bash(chunk auth status)
-  - Bash(chunk auth login)
-  - Bash(chunk auth login --no-browser)
-  - Bash(chunk config set:*)
-  - Bash(chunk org list:*)
-  - Bash(chunk sidecar:*)
-  - Bash(chunk validate:*)
-  - Bash(cat .chunk/config.json)
-  - Bash(cat .chunk/sidecar.json)
-  - Bash(test -n*)
-  - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
 ---
 
 # Chunk Sidecar

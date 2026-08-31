@@ -1,7 +1,6 @@
 ---
 name: chunk-review
 description: Use when asked to "review recent changes", "chunk review", "review my diff", "review this PR", "review PR #123", "review PR <url>", "review my changes", or asks for a code review using the team's review prompt. Supports GitHub PRs via `gh pr diff` and local diffs. Applies team-specific review standards from the .chunk/context/review-prompt.md file.
-version: 3.0.0
 ---
 
 # Chunk Review Skill

@@ -5,7 +5,6 @@ description: >-
   "mutate this code", "test mutation coverage", or "find surviving mutants".
   Runs a 4-stage mutation testing process: discovery, validation on parallel
   sidecars, production cross-reference, and risk assessment.
-version: 2.0.0
 ---
 
 # Chunk Mutate Skill
