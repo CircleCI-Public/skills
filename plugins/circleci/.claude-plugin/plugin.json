@@ -15,6 +15,7 @@
     "ci"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "CircleCI",
     "shortDescription": "Build, test, and deploy any application",
