@@ -1,10 +1,6 @@
 ---
 name: debug-ci-failures
-description: >-
-  Debug CircleCI build failures, analyze test results, and identify flaky tests.
-  Use when the user says "debug CI", "why is CI failing", "fix CI failures",
-  "find flaky tests", "what broke in CI", "check CircleCI", or asks about
-  failing pipelines or build errors.
+description: Debug CircleCI build failures, analyze test results, and identify flaky tests. Use when the user says "debug CI", "why is CI failing", "fix CI failures", "find flaky tests", "what broke in CI", "check CircleCI", or asks about failing pipelines or build errors.
 ---
 
 # Debug CircleCI CI Failures
