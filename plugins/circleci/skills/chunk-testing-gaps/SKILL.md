@@ -1,6 +1,6 @@
 ---
 name: chunk-testing-gaps
-description: Use when asked to "find testing gaps", "chunk testing-gaps", "mutation test", "mutate this code", "test mutation coverage", or "find surviving mutants". Runs a 4-stage mutation testing process: discovery, validation on parallel sidecars, production cross-reference, and risk assessment.
+description: 'Use when asked to "find testing gaps", "chunk testing-gaps", "mutation test", "mutate this code", "test mutation coverage", or "find surviving mutants". Runs a 4-stage mutation testing process: discovery, validation on parallel sidecars, production cross-reference, and risk assessment.'
 ---
 
 # Chunk Mutate Skill
