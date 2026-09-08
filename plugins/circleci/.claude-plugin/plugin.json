@@ -15,8 +15,7 @@
     "ci"
   ],
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json",
-  "interface": {
+"interface": {
     "displayName": "CircleCI",
     "shortDescription": "Build, test, and deploy any application",
     "longDescription": "Bring testing, deployment, and CI best practices into Claude Code",
