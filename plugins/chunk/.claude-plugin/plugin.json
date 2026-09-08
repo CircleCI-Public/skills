@@ -1,0 +1,44 @@
+{
+  "name": "chunk",
+  "version": "1.0.0",
+  "description": "AI-assisted CI/CD with CircleCI Chunk",
+  "author": {
+    "name": "CircleCI",
+    "url": "https://circleci.com"
+  },
+  "homepage": "https://circleci.com",
+  "repository": "https://github.com/circleci-public/skills",
+  "license": "MIT",
+  "keywords": [
+    "chunk",
+    "circleci",
+    "ci/cd",
+    "ai"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Chunk",
+    "shortDescription": "AI-assisted CI/CD with CircleCI Chunk",
+    "longDescription": "Use CircleCI Chunk to fix failing builds, validate CI config, and run AI-assisted tasks from your terminal or the CircleCI web UI",
+    "developerName": "CircleCI",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://circleci.com",
+    "privacyPolicyURL": "https://circleci.com/legal/privacy-policy",
+    "termsOfServiceURL": "https://circleci.com/legal/terms-of-service",
+    "defaultPrompt": [
+      "Set up Chunk for this project",
+      "Fix the failing build using Chunk",
+      "Validate my CircleCI config with Chunk",
+      "Run a Chunk task on the current branch",
+      "Show me what Chunk would do for this pipeline failure"
+    ],
+    "brandColor": "#049B4A",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg"
+  }
+}

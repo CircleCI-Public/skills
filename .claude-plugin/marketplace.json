@@ -18,6 +18,18 @@
       "source": "./plugins/circleci",
       "category": "development",
       "homepage": "https://github.com/circleci-public/skills"
+    },
+    {
+      "name": "chunk",
+      "description": "AI-assisted CI/CD with CircleCI Chunk. Includes skills for setting up Chunk, fixing failing builds, validating CI config, and running AI-assisted tasks.",
+      "version": "1.0.0",
+      "author": {
+        "name": "CircleCI",
+        "url": "https://circleci.com"
+      },
+      "source": "./plugins/chunk",
+      "category": "development",
+      "homepage": "https://github.com/circleci-public/skills"
     }
   ]
 }
