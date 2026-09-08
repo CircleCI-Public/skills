@@ -1,0 +1,26 @@
+{
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "chunk validate",
+          "timeout": 600
+        }
+      ]
+    }
+  ],
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "if": "Bash(git commit*)",
+          "command": "chunk validate",
+          "timeout": 600
+        }
+      ]
+    }
+  ]
+}
