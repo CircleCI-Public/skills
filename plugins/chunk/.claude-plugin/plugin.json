@@ -1,7 +1,7 @@
 {
-  "name": "circleci",
+  "name": "chunk",
   "version": "1.0.0",
-  "description": "Build, test, and deploy any application",
+  "description": "AI-assisted CI/CD with CircleCI Chunk",
   "author": {
     "name": "CircleCI",
     "url": "https://circleci.com"
@@ -10,15 +10,17 @@
   "repository": "https://github.com/circleci-public/skills",
   "license": "MIT",
   "keywords": [
+    "chunk",
     "circleci",
     "ci/cd",
-    "ci"
+    "ai"
   ],
   "skills": "./skills/",
-"interface": {
-    "displayName": "CircleCI",
-    "shortDescription": "Build, test, and deploy any application",
-    "longDescription": "Bring testing, deployment, and CI best practices into Claude Code",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Chunk",
+    "shortDescription": "AI-assisted CI/CD with CircleCI Chunk",
+    "longDescription": "Use CircleCI Chunk to fix failing builds, validate CI config, and run AI-assisted tasks from your terminal or the CircleCI web UI",
     "developerName": "CircleCI",
     "category": "Coding",
     "capabilities": [
@@ -29,12 +31,11 @@
     "privacyPolicyURL": "https://circleci.com/legal/privacy-policy",
     "termsOfServiceURL": "https://circleci.com/legal/terms-of-service",
     "defaultPrompt": [
-      "Review the CircleCI configuration for this project and suggest improvements",
-      "Diagnose and fix build failures for the current branch",
-      "Watch the CircleCI run for my current branch and report the results",
-      "Setup the Chunk cli for this project",
-      "Setup CircleCI Smarter Testing for running tests in this project",
-      "Onboard my project to CircleCI"
+      "Set up Chunk for this project",
+      "Fix the failing build using Chunk",
+      "Validate my CircleCI config with Chunk",
+      "Run a Chunk task on the current branch",
+      "Show me what Chunk would do for this pipeline failure"
     ],
     "brandColor": "#049B4A",
     "composerIcon": "./assets/logo.svg",
