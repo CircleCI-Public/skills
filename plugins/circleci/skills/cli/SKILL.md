@@ -9,7 +9,8 @@ The everyday loop: change config → commit/push → watch the run → read fail
 Almost every command **infers the project from the current git remote and the branch from
 your checked-out branch**, so from inside a repo you rarely pass `--project`/`--branch`.
 
-Preflight once: `circleci version` and `circleci api api/v2/me` (auto-reads `$CIRCLE_TOKEN`).
+Preflight once: `circleci version` and `circleci auth me` (auto-reads `$CIRCLE_TOKEN` and
+confirms which user it resolves to, so it doubles as an auth check).
 
 ## 1. Before you commit — validate locally (fast feedback)
 
@@ -101,7 +102,11 @@ CLI flag for it; `circleci run open` gets you there fast.
 - Logs, tests, and artifacts key off the **job UUID** (from `run get --json` /
   `workflow get`), not the job number.
 - `run cancel` takes a run number *or* UUID; pass `--project` when cancelling by number.
-- `circleci api <path>` defaults to `/api/v3` — prefix `api/v2/...` explicitly for v2 endpoints.
+- `circleci api <path>` resolves relative to `/api/v3`; a path starting with `api` is sent as
+  given. Reach for it only when no command covers what you need.
+- One execution of a pipeline is a **run** (`run list`, `run get`). `circleci pipeline`
+  manages pipeline *definitions*, the config and checkout sources a run executes, so
+  `pipeline list` is not where runs live.
 - Don't confuse `run trigger` (this skill: fire a run on the inferred project/branch) with
   `pipeline run --definition-id …` (definition-targeted; see the onboarding skill).
 - Verify a real run + `job output`/`testresult` — a green status alone doesn't prove the
@@ -114,11 +119,10 @@ CLI flag for it; `circleci run open` gets you there fast.
   organization/project scope before mutating pipeline state.
 - **Never print raw secret values** from environment variables or tokens. Pipe secrets from
   `op read`/stdin — never pass them as command-line args (they leak into shell history and logs).
-- **Don't invent commands.** Current CLI (≥1.0) exposes `pipeline`, `project`, `trigger`,
-  `run`, `job`, `workflow`, `config`, and `api`. Verify with `circleci help` first; if a
-  subcommand isn't listed, don't use it. On older builds that lack `api`/`logs`, fall back to
-  the `pipeline`/`trigger`/`run` verbs and read cloud job logs from the CircleCI app/UI or
-  connected CircleCI MCP tooling.
+- **Don't invent commands.** Verify with `circleci help` first; if a subcommand isn't
+  listed, don't use it. There is no top-level `trigger`: firing a run is `run trigger`, and
+  `project trigger` manages the triggers attached to a definition. On older builds that lack
+  `api`, read cloud job logs from the CircleCI app/UI or connected CircleCI MCP tooling.
 - **If auth/permissions fail, report the exact scope gap** and safest remediation
   (`circleci auth login`, refresh permissions in User Settings) rather than retrying blindly.
 
