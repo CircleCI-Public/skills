@@ -26,19 +26,34 @@ answer is in this file instead.
 > explains org type vs pipeline type, the `project follow` webhook trap, central
 > config, URL-orb allow-listing, and CLI teardown limits.
 
-**`circleci onboard` is the same flow in one command.** It generates a config,
-signs the user up, creates and follows the project, and adds a pipeline
-definition plus an all-pushes trigger — and it is idempotent, so it is safe on a
-re-run. It needs a TTY to ask which org to use, so it only completes
-unattended when the account has exactly one org. Two ways to use it:
+**`circleci onboard` does Stages 1 and 3 to 5 in one command. Prefer it.** It
+signs the user up if needed, generates a config, creates and follows the
+project, resolves the repository, and adds a pipeline definition with an
+all-pushes trigger. It is idempotent, so it is safe to re-run.
 
-- The user is at their own terminal: tell them to run `circleci onboard` and
-  answer the prompts. That is the best experience available and you should offer
-  it.
-- You are driving (no TTY): run `circleci onboard --scan` when the account has
-  exactly one org (Stage 2 tells you), and work through the stages below
-  otherwise. They are the non-interactive equivalent, with you asking the
-  questions the CLI would have prompted for.
+Resolve the organization first (Stage 2), because that is the one thing it
+cannot work out for you, then:
+
+```bash
+circleci onboard --scan --org <org-slug>
+```
+
+Read its output before moving on:
+
+- **It printed an install URL.** The CircleCI GitHub App is not connected, so
+  the project exists but has no pipeline. Hand the user that URL, then re-run.
+- **It exited non-zero.** It says what is missing and nothing was half-created.
+  Fix that and re-run rather than falling through to the stages.
+- **It rejected `--org` as an unknown flag.** The installed CLI predates the
+  flag. Work through the stages below instead; they are the same flow done by
+  hand.
+
+Two things it does not cover. The trigger is always `all-pushes`, so use Stage 5
+instead if the user wants a different preset. And it stops once the pipeline is
+wired up, so Stage 6 still applies either way.
+
+If the user is at their own terminal, plain `circleci onboard` prompts for
+everything and is the nicest version of this. Offer it.
 
 ---
 
@@ -132,20 +147,21 @@ This is the one inline source of org **slugs**, which is what `--org` takes.
   To create one, ask for a name, then:
 
   ```bash
-  circleci api api/v2/organization -f name="<org-name>" -f vcs_type=circleci --jq .slug
+  circleci org create <name> --json
   ```
 
-  That is the same endpoint `circleci onboard` uses, and it returns the new
-  org's slug (`circleci/<uuid>`) — a **standalone** org, which is the type that
-  supports GitHub App pipelines. Re-run the collaborations call to confirm.
+  Keep both `slug` and `id` from that output: the slug is what `--org` takes,
+  and the id is the UUID the stages below use. It is a **standalone** org, the
+  type that supports GitHub App pipelines.
 
 A GitHub org is never created this way: a `gh/<org>` org appears on its own once
 you log in with GitHub or install the GitHub App on that GitHub organization. If
 the user expected to see one and doesn't, that is a Stage 3 problem, not an org
 creation problem.
 
-Note the org slug **and** the org UUID (`.id` from the same call) — Stage 3 and
-Stage 5 both need the UUID.
+Note the org slug. If you are handing off to `circleci onboard --scan --org`,
+that is all you need. Keep the org UUID (`.id`) as well if you are working
+through Stages 3 and 5 by hand, because both address the org by UUID.
 
 ---
 
