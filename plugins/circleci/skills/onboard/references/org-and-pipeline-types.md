@@ -60,10 +60,16 @@ keys aren't disabled.
 
 ## Trigger event presets and options
 
-`project trigger create --event-preset <preset>` selects which VCS events fire the pipeline
-(all-pushes, PR-only, default-branch-only, tag-only, and many more). For the current set of
-presets and their semantics, see the CircleCI docs (use the **circleci-config** skill / docs
-MCP, or search "trigger event presets").
+`project trigger create --event-preset <preset>` selects which VCS events fire the pipeline.
+The presets the CLI accepts (confirm against
+`circleci project trigger create --help`, which is the authoritative list for your build):
+
+`all-pushes`, `only-tags`, `default-branch-pushes`, `only-build-prs`, `only-open-prs`,
+`only-labeled-prs`, `only-merged-prs`, `only-ready-for-review-prs`, `only-branch-delete`,
+`only-build-pushes-to-non-draft-prs`, `only-merged-or-closed-prs`, `pr-comment-equals-run-ci`,
+`non-draft-pr-opened`, `pushes-to-merge-queues`.
+
+Run `circleci help triggers` for what each provider and preset means.
 
 Trigger notes worth knowing regardless of preset:
 - `--provider`: `github_app`, `github_server`, `github_oauth`, `webhook`, or `schedule`
