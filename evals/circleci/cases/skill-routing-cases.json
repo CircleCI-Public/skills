@@ -85,6 +85,21 @@
         "get started with circleci",
         "create a circleci project"
       ]
+    },
+    "circleci-deploy-setup": {
+      "phrases": [
+        "deploy marker",
+        "deploy setup",
+        "deploy pipeline",
+        "rollback pipeline",
+        "deploy.yml",
+        "rollback.yml",
+        "release validation",
+        "validation webhook",
+        "auto-rollback",
+        "smart deployments",
+        "set up deploys"
+      ]
     }
   },
   "cases": [
@@ -215,6 +230,30 @@
     {
       "prompt": "Help debug an intermittent Playwright test in our local test suite.",
       "expected": null
+    },
+    {
+      "prompt": "Set up deploy markers and release validation for this service so we can track deploys in CircleCI.",
+      "expected": "circleci-deploy-setup"
+    },
+    {
+      "prompt": "Use $circleci-deploy-setup to generate a deploy pipeline and a rollback pipeline for this repo.",
+      "expected": "circleci-deploy-setup"
+    },
+    {
+      "prompt": "What deploy setup does this repo already have, and can you add auto-rollback with a validation webhook from Datadog?",
+      "expected": "circleci-deploy-setup"
+    },
+    {
+      "prompt": "Set up deploy markers and release validation for this service so we can track deploys in CircleCI.",
+      "expected": "circleci-deploy-setup"
+    },
+    {
+      "prompt": "Use $circleci-deploy-setup to generate a deploy pipeline and a rollback pipeline for this repo.",
+      "expected": "circleci-deploy-setup"
+    },
+    {
+      "prompt": "What deploy setup does this repo already have, and can you add auto-rollback with a validation webhook from Datadog?",
+      "expected": "circleci-deploy-setup"
     }
   ]
 }
