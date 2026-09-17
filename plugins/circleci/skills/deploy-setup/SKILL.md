@@ -93,7 +93,8 @@ registration check below is a CLI command.
 |-----------|--------------|
 | `circleci` CLI | `circleci version`, then `circleci auth me`. Not required, but recommended — raise it in step 2 if absent |
 | VCS and slug | `git remote get-url origin` |
-| VCS integration | `circleci pipeline list --json --jq '.[].config_source.provider'`. **This bounds the achievable scope** — deploy and rollback pipelines do not exist on GitLab, Bitbucket, or Cursor Origin, and need the GitHub App on OAuth orgs. Raise it in step 2, see `references/api.md` |
+| VCS integration | `circleci pipeline list --json --jq '.[].config_source.provider'`. **This bounds the achievable scope** — deploy and rollback pipelines do not exist on GitLab, Bitbucket, or Cursor Origin. Raise it in step 2, see `references/api.md` |
+| GitHub App connection | Only if the above says `github_oauth`. A `github_oauth` project can still take App definitions **if the org has the App connected**, and the provider alone cannot tell you — run the `provider/repositories` probe in `references/api.md`. Checking here avoids discovering it as a failed write at step 9 |
 | Deploy jobs | Read `.circleci/config.yml` in full. Watch for setup-workflows or dynamic config, where the deploy job lives in a continuation config |
 | Deploy markers | Per job: absent, log-only, partial, or complete. See the detection rules in `references/markers.md` |
 | Deploy pipeline | Does `.circleci/deploy.yml` exist, and is it registered? |
@@ -128,12 +129,14 @@ State prerequisites honestly when they affect the choice:
 - validation needs a monitoring tool the user can actually configure
 - validation without markers is meaningless: there is no planned release to attach to
 - **the VCS integration may put part of the scope out of reach.** Deploy and rollback
-  pipelines are unavailable on GitLab, Bitbucket, and Cursor Origin, and need the GitHub
-  App on a GitHub OAuth org — and auto-rollback needs a rollback pipeline, so it goes with
-  them. Say this *before* offering the full setup, so you are not recommending something
-  the integration cannot do. Markers and validation still work on all of them, and that is
-  most of the value. For a GitHub OAuth org, mention that installing the App is a one-off
-  that unlocks the rest and coexists with their existing integration. See `references/api.md`
+  pipelines are unavailable on GitLab, Bitbucket, and Cursor Origin, and need a connected
+  GitHub App on a GitHub OAuth org — and auto-rollback needs a rollback pipeline, so it
+  goes with them. Say this *before* offering the full setup, so you are not recommending
+  something the integration cannot do. Markers and validation still work on all of them,
+  and that is most of the value. For a GitHub OAuth org, mention that adding the App is a
+  one-off that unlocks the rest and coexists with their existing integration — and that it
+  must be started from **Org → VCS Connections in CircleCI**, not from GitHub, or it will
+  not connect. See `references/api.md`
 
 **Ask which monitoring tool they use, and say that any tool works.** Datadog, Grafana,
 Prometheus and Alertmanager have built-in defaults, but `provider: custom` handles anything
@@ -327,8 +330,14 @@ because only one has a workaround:
 
 - **The feature is unavailable** on GitLab, Bitbucket, and Cursor Origin. There is no UI
   fallback; do not send the user looking for one. Markers and validation still stand.
-- **The App is missing** on a GitHub OAuth org. Recommend installing the CircleCI GitHub
-  App, which every org can now do alongside their existing integration.
+- **The GitHub App is not connected** to the org. Every org can add it alongside their
+  existing integration, and they must start from **Org → VCS Connections in CircleCI** —
+  installing from GitHub's side leaves it unconnected and the create keeps failing.
+
+If a create returns `pipeline_definition.create_failed`, that is almost always the missing
+org-level App connection rather than anything about this project. Work through the
+diagnosis table in `references/api.md` instead of retrying, and do not invent a
+project-level reconnect step — there isn't one.
 
 Never let a failed or skipped creation read as success. The committed config does nothing
 until the pipelines are registered. See `references/api.md` for the support matrix.

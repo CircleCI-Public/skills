@@ -19,10 +19,15 @@ does not exist at all, so do **not** send the user here — the UI cannot create
 either. Say the integration does not support deploy and rollback pipelines, and that
 markers and validation still work.
 
-**On GitHub OAuth without the App, offer the real fix instead of these steps.** Installing
-the CircleCI GitHub App is what makes deploy and rollback pipelines available; it coexists
-with their OAuth integration and migrates nothing. It is an org-level action, so they may
-need an admin.
+**On a GitHub OAuth org with no connected App, offer the real fix instead of these steps.**
+Adding the CircleCI GitHub App is what makes deploy and rollback pipelines available; it
+coexists with their OAuth integration and migrates nothing. It is an org-level action, so
+they may need an admin.
+
+Send them to **Org → VCS Connections → GitHub App** and say explicitly that it has to be
+started there rather than from GitHub — an install initiated on GitHub does not connect to
+the CircleCI org, and leaves the App looking installed while every definition create still
+fails. See `api.md`.
 
 Lead by saying you could not create these for them and why, so it does not read as an
 oversight. Same page as the designation step:

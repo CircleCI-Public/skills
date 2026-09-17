@@ -109,7 +109,7 @@ Two separate limits apply, and confusing them produces bad advice:
 |-------------|----------------|------------------------------|------------------------|
 | GitHub App | yes | yes | yes |
 | GitHub Enterprise Server | yes | yes | yes |
-| GitHub **OAuth**, no App installed | yes | needs the GitHub App | no — install the App |
+| GitHub **OAuth**, no App connected | yes | needs the GitHub App | no — connect the App first |
 | GitLab, GitLab self-managed | yes | **not supported** | no |
 | Bitbucket Cloud | yes | **not supported** | no |
 | Bitbucket Data Center | **not supported** | **not supported** | accepted, but moot |
@@ -117,7 +117,8 @@ Two separate limits apply, and confusing them produces bad advice:
 
 So the failure modes are genuinely different, and the thing to say differs with them:
 
-- **GitHub OAuth without the App** — fixable. Recommend installing it, see below.
+- **GitHub OAuth with no connected App** — fixable, and the fix has a specific starting
+  point that people miss. See below.
 - **GitLab, Bitbucket Cloud, Cursor Origin** — markers and validation work; deploy and
   rollback pipelines are **unavailable on this integration**. Drop them from the scope and
   say why. Do not send the user to the UI to create something the UI cannot create either.
@@ -129,34 +130,84 @@ Never let a skipped or failed creation read as success: the committed config doe
 until the pipelines are registered, and someone who thinks setup finished discovers
 otherwise at their next deploy.
 
-Detecting the integration locally is imperfect. The usable signal is the project's existing
-definitions:
+### Two checks, not one
+
+The project's existing definitions tell you what it uses **today**:
 
 ```bash
 circleci pipeline list --json --jq '.[].config_source.provider'
 ```
 
-If the project has no definitions yet, you cannot tell in advance — attempt the create and
-read the error rather than guessing, then fall back.
+That is not sufficient on its own. A `github_oauth` project in an org that has the GitHub
+App properly connected **can** take new `github_app` definitions, and one in an org without
+it cannot — and the command above returns `github_oauth` either way. So check the
+connection separately before promising anything:
+
+```bash
+ORG_ID=$(circleci api 'api/v2/project/{provider}/{org}/{project}' --jq '.organization_id')
+circleci api "api/v3/provider/repositories?filter[org_id]=${ORG_ID}&filter[provider]=github_app"
+```
+
+A populated list means the App is connected to **this CircleCI org** and shows which repos
+it can reach — so it also settles repo scoping, which is the other thing that can block a
+create. An error or an empty list means treat it as **not connected**, and go to the
+section below.
+
+Do not report the exact failure shape as if you knew it; the useful distinction is
+populated versus not. If the project has no definitions at all and you cannot run this
+probe, attempt the create and read the error rather than guessing.
 
 `origin` *is* a valid public-API provider value, but only for
 `GET /api/v3/provider/repositories`, which lists reachable repos. It is not a valid
 config or checkout source, so it does not help here.
 
-### GitHub OAuth org: recommend installing the GitHub App
+### GitHub OAuth org: connecting the GitHub App
 
 An org on the legacy GitHub OAuth app can still run pipelines — `github_oauth` is a valid
-**event source** — but it is not a valid config or checkout source, so no pipeline
-definition can be created for it. Deploy and rollback pipelines need the GitHub App.
+**event source** — but it is not a valid config or checkout source. Deploy and rollback
+pipelines need the GitHub App.
 
-This is not a dead end, and it is worth stating plainly: **every org can now install the
-CircleCI GitHub App, including orgs already on the OAuth app.** The two coexist; installing
-the App does not migrate or disturb the existing OAuth integration, and it is what unlocks
-pipeline definitions along with the rest of the newer functionality.
+This is not a dead end: **every org can now add the CircleCI GitHub App, including orgs
+already on the OAuth app.** The two coexist; adding the App does not migrate or disturb the
+existing OAuth integration, and App pipelines can live alongside OAuth ones in the same
+org.
 
-Point them at the org's GitHub integration settings, note that it is an org-level action
-they may need an admin for, and offer to continue with the config work meanwhile — steps 3
-through 8 do not depend on it at all.
+> **Tell them to start from CircleCI, not from GitHub.** This is the step people get wrong,
+> and getting it wrong looks like success.
+>
+> **Org → VCS Connections → GitHub App**, then follow the install and authorize prompts.
+
+Installing the App from GitHub's side — the marketplace page, or the org's GitHub settings
+— installs it on GitHub **without connecting it to the CircleCI org**. CircleCI records the
+installation only when the install is initiated from CircleCI, because it hands GitHub a
+signed state value it validates on the way back. Skip that and GitHub reports the App as
+installed on all repositories while CircleCI still has no installation for the org, so
+every `github_app` definition create fails.
+
+It is an org-level action they may need an admin for. Offer to continue with the config
+work meanwhile — steps 3 through 8 do not depend on it at all.
+
+### When a create fails anyway
+
+`pipeline_definition.create_failed` is opaque and has one overwhelmingly likely cause:
+**the org has no connected GitHub App installation.** Creating a `github_app` config source
+resolves the org's installation first, and that lookup failing is what you are seeing.
+
+Check, in this order, and stop at the first that explains it:
+
+| Check | How | If this is it |
+|-------|-----|---------------|
+| App connected to this CircleCI org | the `provider/repositories` probe above | Have them connect it from Org → VCS Connections. **This is the usual answer** |
+| App can reach this repo | same probe — is the repo in the list? | Have them widen the installation's repository access on GitHub |
+| Right App | an org can also have the legacy **`circleci-checks`** app, which only does status checks | `circleci-checks` alone is not enough; they need the main CircleCI GitHub App |
+
+**Do not conclude the project needs a "reconnect" or "migrate" step.** There is no such
+project-level action, and sending the user to look for one wastes their time. The thing
+that is missing is an org-level connection.
+
+If they installed the App from GitHub before you told them not to, connecting it from
+CircleCI may require **removing the installation on GitHub first**, then redoing it from
+Org → VCS Connections. Offer that as the next thing to try, not as a certainty.
 
 ### Idempotency
 
