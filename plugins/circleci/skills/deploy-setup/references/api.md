@@ -47,6 +47,41 @@ the background or with a generous timeout, not a foreground call that gives up a
 minute. And with no TTY it opens the browser and prints the URL to stderr, so pass that URL
 along and tell the user to go approve it; they are watching you, not your tool output.
 
+### The token needs write access
+
+The consent screen offers **Read**, **Write**, and **Admin**. Read covers the whole of
+step 1 — versions, definitions, settings — and then fails at step 9, because creating a
+pipeline definition is a write. **Write is the minimum this skill needs**; Admin is not
+required.
+
+Say this when you recommend logging in. A user picking the most conservative option is
+behaving sensibly, and they have no way to know it breaks a later step unless you tell
+them.
+
+**You cannot read the granted scope back.** `circleci auth me` returns identity only, so
+there is no probe to run — state the requirement up front and treat a failed create as
+the signal.
+
+Two other things cap what the token can do:
+
+- **the user's org role.** The scope is a ceiling, not a grant: a **Viewer** gets a
+  read-only token whatever they pick on the consent screen. If re-authorizing with Write
+  does not help, the role is why, and only an org admin can change it.
+- **`CIRCLE_TOKEN`.** It takes precedence over stored credentials, so a read-only token
+  left in the environment silently overrides a freshly authorized CLI. Rule it out before
+  concluding the re-auth failed.
+
+A token cannot be re-scoped after it is issued, so the fix is always to authorize again:
+
+```bash
+circleci auth logout
+circleci auth login    # choose Write on the consent screen
+```
+
+Tokens created by hand on the Personal API Tokens page carry the user's full permissions
+instead, so scope is not the problem for those — though they do expire on whatever date
+was set when they were created.
+
 ### Output and targeting
 
 Human output is markdown. Add `--json` for structured data and `--jq '<expr>'` to filter
@@ -187,11 +222,44 @@ every `github_app` definition create fails.
 It is an org-level action they may need an admin for. Offer to continue with the config
 work meanwhile — steps 3 through 8 do not depend on it at all.
 
-### When a create fails anyway
+### When a create fails
 
-`pipeline_definition.create_failed` is opaque and has one overwhelmingly likely cause:
-**the org has no connected GitHub App installation.** Creating a `github_app` config source
-resolves the org's installation first, and that lookup failing is what you are seeing.
+**Read the error before acting.** The two common failures have unrelated causes, and
+treating one as the other sends the user somewhere useless.
+
+| Error | Cause | Where to go |
+|-------|-------|-------------|
+| **404** | The token lacks write access — **check this first** | Below |
+| `pipeline_definition.create_failed` | The org has no connected GitHub App | Further below |
+
+#### 404 on create: suspect the token scope first
+
+A 404 reads as "project not found" and almost never is. An authorization failure on a
+write comes back as 404 rather than 403, so a read-scoped token trying to create a
+definition looks exactly like a project that does not exist.
+
+The cleanest confirmation is the contrast between reads and writes: **if
+`circleci pipeline list` succeeds against the same project and only the create 404s, the
+token is read-scoped.** A genuinely missing project would fail both.
+
+So do not send the user hunting for a missing project, and do not retry — the result will
+not change. Work through this instead:
+
+1. Is `CIRCLE_TOKEN` set in the environment? It overrides the stored credential, and a
+   read-only value there survives any amount of re-authorizing.
+2. Re-authorize — `circleci auth logout`, then `circleci auth login`, choosing **Write**
+   on the consent screen. See the scope notes above.
+3. Still failing? The user's org role is capping the scope. A Viewer cannot hold a write
+   token, and only an org admin can change that.
+
+Tell the user which of these you are asking them to check and why, rather than just
+asking them to log in again.
+
+#### `pipeline_definition.create_failed`: the App connection
+
+This one is opaque and has one overwhelmingly likely cause: **the org has no connected
+GitHub App installation.** Creating a `github_app` config source resolves the org's
+installation first, and that lookup failing is what you are seeing.
 
 Check, in this order, and stop at the first that explains it:
 

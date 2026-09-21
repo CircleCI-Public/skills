@@ -91,7 +91,7 @@ registration check below is a CLI command.
 
 | Component | How to check |
 |-----------|--------------|
-| `circleci` CLI | `circleci version`, then `circleci auth me`. Not required, but recommended — raise it in step 2 if absent |
+| `circleci` CLI | `circleci version`, then `circleci auth me`. Not required, but recommended — raise it in step 2 if absent. Registering pipelines needs a **write**-scoped token, which you cannot check for; say so in step 2 rather than discovering it at step 9 |
 | VCS and slug | `git remote get-url origin` |
 | VCS integration | `circleci pipeline list --json --jq '.[].config_source.provider'`. **This bounds the achievable scope** — deploy and rollback pipelines do not exist on GitLab, Bitbucket, or Cursor Origin. Raise it in step 2, see `references/api.md` |
 | GitHub App connection | Only if the above says `github_oauth`. A `github_oauth` project can still take App definitions **if the org has the App connected**, and the provider alone cannot tell you — run the `provider/repositories` probe in `references/api.md`. Checking here avoids discovering it as a failed write at step 9 |
@@ -167,6 +167,13 @@ installing it, and be specific about what it buys them:
 Install with the [local CLI instructions](https://circleci.com/docs/local-cli/), then
 `circleci auth login` — an OAuth browser flow that needs no token from them. If it is
 installed but unauthenticated, `circleci auth login` is the whole fix.
+
+**Tell them to choose Write on the consent screen.** It offers Read, Write, and Admin;
+Read is enough for the audit and then fails at step 9, because registering a pipeline is
+a write. Admin is not needed. Mention it whenever you send someone to `auth login` — a
+user picking the least privilege is being sensible, and cannot know it breaks a later
+step unless you say so. The scope cannot be read back or changed afterwards, so the only
+remedy later is logging out and authorizing again. See `references/api.md`.
 
 Then make the offer honestly, because it is genuinely a recommendation and not a gate:
 
@@ -334,10 +341,18 @@ because only one has a workaround:
   existing integration, and they must start from **Org → VCS Connections in CircleCI** —
   installing from GitHub's side leaves it unconnected and the create keeps failing.
 
-If a create returns `pipeline_definition.create_failed`, that is almost always the missing
-org-level App connection rather than anything about this project. Work through the
-diagnosis table in `references/api.md` instead of retrying, and do not invent a
-project-level reconnect step — there isn't one.
+**When a create fails, read the error — the two common ones have opposite fixes:**
+
+- **404** — the token almost certainly lacks **write** access. It is not a missing
+  project, however much it reads like one; an authorization failure on a write returns
+  404, not 403. If `circleci pipeline list` works and only the create 404s, that is your
+  confirmation. The fix is `circleci auth logout` then `circleci auth login`, choosing
+  **Write**. **Try this before anything else.**
+- **`pipeline_definition.create_failed`** — the org has no connected GitHub App, rather
+  than anything about this project.
+
+Work through the diagnosis tables in `references/api.md` instead of retrying, and do not
+invent a project-level reconnect step — there isn't one.
 
 Never let a failed or skipped creation read as success. The committed config does nothing
 until the pipelines are registered. See `references/api.md` for the support matrix.
