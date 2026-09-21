@@ -30,11 +30,6 @@ and `cmd/subcommand/update/update.go`.
 
 The plan name passed to `update` must match the one passed to `plan`.
 
-### Careful: `circleci run deploy` differs
-
-The sibling `circleci run deploy` command uses `--environment`, **not**
-`--environment-name`. Do not copy flag spellings between the two.
-
 ## Step shapes to emit
 
 Match these exactly, so the result is consistent with what the guided setup in the web app
