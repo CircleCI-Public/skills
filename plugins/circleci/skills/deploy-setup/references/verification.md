@@ -64,7 +64,7 @@ the first.
 
 ```bash
 grep -oE 'circleci run release plan[[:space:]]+[^ \\]+' .circleci/*.yml \
-  | sed -E 's/.*plan[[:space:]]+//' | tr -d '"' | sort | uniq -c
+  | sed -E 's/:circleci run release plan[[:space:]]+/ /' | tr -d '"' | sort | uniq -c
 grep -nE 'deploys/(plan|log)' .circleci/*.yml
 ```
 
@@ -73,9 +73,10 @@ containing the literal text the first command looks for. **A job with both an or
 a raw `plan` is the duplicate this check exists to find**, and the first command alone
 cannot see it.
 
-Every count must be 1. A count above 1 is legitimate only if the same plan name is planned
-in genuinely separate pipelines — `config.yml` and `deploy.yml` are different files and
-different pipelines, so check which file each hit came from before treating it as a fault.
+Output is one line per file and plan name, so **every count must be 1**. The filename is
+kept deliberately: the same plan name in `config.yml` and in `deploy.yml` is legitimate,
+because those are separate pipelines. Counting names alone would report that pair as a
+duplicate. A count above 1 means one file plans the same name twice, which is the fault.
 
 ## 3. Every `update` references a planned name
 

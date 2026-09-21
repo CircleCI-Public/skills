@@ -192,9 +192,11 @@ it cannot — and the command above returns `github_oauth` either way. So check 
 connection separately before promising anything:
 
 ```bash
-ORG_ID=$(circleci api 'api/v2/project/{provider}/{org}/{project}' --jq '.organization_id')
-circleci api "api/v3/provider/repositories?filter[org_id]=${ORG_ID}&filter[provider]=github_app"
+circleci api 'api/v3/provider/repositories?filter[org_id]={org-id}&filter[provider]=github_app'
 ```
+
+`{org-id}` is resolved from the git remote, so there is no separate lookup. **Keep the
+single quotes** — they stop the shell expanding the `[` and `]` in the query string.
 
 A populated list means the App is connected to **this CircleCI org** and shows which repos
 it can reach — so it also settles repo scoping, which is the other thing that can block a
@@ -320,9 +322,15 @@ from the stored token, and the exit code is 0 for 2xx, 4 for 4xx/5xx.
 circleci api api/v2/deploy/projects/{project_id}/releases --jq '.items[0]'
 ```
 
-A literal `{project-id}` placeholder is substituted for you when run from a repo with
-detected remotes, so `circleci api 'projects/{project-id}'` works as written. Pass the real
-UUID when you want determinism.
+**Exactly two placeholders are substituted: `{project-id}` and `{org-id}`.** Both are
+resolved from the git remote, so `circleci api 'projects/{project-id}'` works as written,
+and either one may appear in a query string as well as in the path. Pass the real UUID when
+you want determinism.
+
+Nothing else is expanded. A path like `api/v2/project/{provider}/{org}/{project}` is sent
+literally and returns 404 — and because the 404 body is not a UUID, piping it into the next
+command produces a misleading 400 rather than an obvious failure. If you need a value the
+placeholders do not cover, fetch it in its own command and check it before reusing it.
 
 This is how you close the verification loop at step 12 without composing a `curl` that
 carries a token.

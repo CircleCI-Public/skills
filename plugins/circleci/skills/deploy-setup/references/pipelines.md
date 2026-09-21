@@ -89,6 +89,12 @@ Rules that matter:
   `helm/install_helm_client`, or a custom `load-version` verbatim — do not reimplement orb
   functionality as plain `run` steps, because the assembler only copies orbs and commands
   that the generated job actually references as steps.
+- **Do not carry over branch filters.** "Preserve the source job" means executors, orbs and
+  steps — not the source workflow's `filters:` / `branches:` block. These pipelines are
+  triggered on demand from the Deploys UI, which runs them against the project's default
+  branch unless the caller names another one. A `branches: only: main` filter therefore
+  looks harmless and then silently yields a workflow with no jobs the first time someone
+  deploys from a different branch. Leave the deploy and rollback jobs unfiltered.
 
 ### Rolling back means redeploying a version, not "undo"
 
