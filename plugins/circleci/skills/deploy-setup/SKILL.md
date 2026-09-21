@@ -27,10 +27,10 @@ flowchart TD
   Ask --> Markers[3. Instrument deploy markers]
   Markers --> Val{Validation in scope?}
   Val -->|yes| RelJob["4. Add the type: release job<br>and the validation block"]
-  Val -->|no| Verify
-  RelJob --> Verify[5. Validate config and check invariants]
-  Verify --> Pipelines[6. Generate deploy.yml and rollback.yml]
-  Pipelines --> Review[7. Interactive diff review]
+  Val -->|no| Pipelines
+  RelJob --> Pipelines[5. Generate deploy.yml and rollback.yml]
+  Pipelines --> Verify[6. Validate config and check invariants]
+  Verify --> Review[7. Interactive diff review]
   Review --> Commit["8. Commit on a branch and open a PR<br>(direct to main only if asked)"]
   Commit --> Merged{Config on the default branch?}
   Merged -->|"not yet, PR open"| Wait["Register now, but say it cannot<br>trigger until the PR merges"]
@@ -73,8 +73,8 @@ Load these on demand; do not read them all upfront.
 |------|--------------|
 | `references/markers.md` | Instrumenting jobs with deploy markers (step 3) |
 | `references/orbs.md` | The repo uses an AWS deploy orb |
-| `references/verification.md` | Before every diff review — the six invariants (step 5) |
-| `references/pipelines.md` | Generating `deploy.yml` / `rollback.yml` (step 6) |
+| `references/pipelines.md` | Generating `deploy.yml` / `rollback.yml` (step 5) |
+| `references/verification.md` | Before every diff review — the six invariants (step 6) |
 | `references/validation.md` | The user wants release validation or auto-rollback (step 4, and diagnosis at step 12) |
 | `references/api.md` | Registering pipeline definitions via CLI (step 9) |
 | `references/ui-steps.md` | User-handoff steps: designate pipelines, mint webhook secret (steps 9–10) |
@@ -96,7 +96,8 @@ registration check below is a CLI command.
 | VCS integration | `circleci pipeline list --json --jq '.[].config_source.provider'`. **This bounds the achievable scope** — deploy and rollback pipelines do not exist on GitLab, Bitbucket, or Cursor Origin. Raise it in step 2, see `references/api.md` |
 | GitHub App connection | Only if the above says `github_oauth`. A `github_oauth` project can still take App definitions **if the org has the App connected**, and the provider alone cannot tell you — run the `provider/repositories` probe in `references/api.md`. Checking here avoids discovering it as a failed write at step 9 |
 | Deploy jobs | Read `.circleci/config.yml` in full. Watch for setup-workflows or dynamic config, where the deploy job lives in a continuation config |
-| Deploy markers | Per job: absent, log-only, partial, or complete. See the detection rules in `references/markers.md` |
+| Deploy markers | Per job: absent, log-only, partial, or complete. Check for `circleci run release` steps **and** for `deploys/plan` / `deploys/log` from the `circleci/deploys` orb, which is instrumentation with no `circleci run release` text in it. See the detection rules in `references/markers.md` |
+| Kubernetes deploys | If a job runs `kubectl` or `helm`, ask whether they use the CircleCI release agent — it changes which markers are correct, and the repo cannot tell you. See `references/markers.md` |
 | Deploy pipeline | Does `.circleci/deploy.yml` exist, and is it registered? |
 | Rollback pipeline | Does `.circleci/rollback.yml` exist, and is it registered? |
 | Registration | `circleci pipeline list --json` and `circleci deploy settings --json`. Both default to the git remote, so no IDs needed. See `references/api.md` |
@@ -212,7 +213,7 @@ changes completely depending on whether half of it already exists.
 
 **Ask before assuming, once.** Component name, environment name, and target version
 determine whether validation webhooks match later. A wrong guess here fails silently at
-step 12, not at step 5. Infer from the repo, then show the user what you inferred and let
+step 12, not at step 6. Infer from the repo, then show the user what you inferred and let
 them correct it in one pass — do not interrogate them field by field. Fold this into the
 step 2 question rather than asking twice.
 
@@ -256,6 +257,20 @@ public read API when the user says they are done.
 **A handoff is not a silent skip.** Whenever you hand a step over, say what you could not
 do and why, in the moment. The failure this guards against is the user believing setup is
 complete while nothing is registered.
+
+## Step 6: validate the config and check the invariants
+
+**Not optional, and not the same as `circleci config validate`.** Every check in
+`references/verification.md` describes a config that compiles cleanly while being broken:
+a dropped deploy step, two plans for one deployment, an `update` naming a plan that was
+never created, a premature `SUCCESS` that makes validation decorative.
+
+Run them after generating the pipelines, so `deploy.yml` and `rollback.yml` are covered
+too, and before showing the user the diff at step 7.
+
+Report what each check found, and say plainly which ones could not be conclusive — a
+config using variable plan names, or block-scalar commands, limits what the greps can
+prove. "Validated" on its own is not a report.
 
 ## Step 8: commit and open a PR
 
@@ -366,6 +381,21 @@ this yourself.
 `GET /api/v2/deploy/projects/{project_id}/settings` and check that
 `deploy_pipeline_definition_id` and `rollback_pipeline_definition_id` point at the
 definitions you created. Say plainly if either is missing or stale.
+
+## Step 12: prove it with a real deploy
+
+**Validation setup is not finished until a real deploy matches.** Everything before this
+proves shape: the config compiles, the definitions exist, the webhook returns 2xx. None of
+it proves the monitoring payload actually resolves to a release — the ingest endpoint
+returns success even when nothing matches, so a synthetic POST cannot tell you.
+
+Only a deploy from the default branch can. Trigger one, then check the release reached the
+expected state and the validation attached to it, using `circleci run list --branch` and
+`circleci job output list`, or the deploys UI. See `references/validation.md` for reading
+the result and `references/monitoring.md` for the tag mismatches that cause silence.
+
+If the user is not ready to deploy, say the setup is **unverified** rather than done, and
+tell them this is the step that would confirm it.
 
 ## This skill ships no scripts
 

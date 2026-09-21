@@ -16,6 +16,7 @@ Skills include:
 - circleci config management and optimization
 - CircleCI Smarter Testing (testsuite) onboarding and `test-suites.yml` setup
 - guided onboarding of a new project to CircleCI (incl. org/pipeline types, `project follow`, central config)
+- deploy setup: deploy markers, deploy/rollback pipelines, release validation and monitoring webhooks
 
 ## Manual eval runs
 
@@ -39,6 +40,7 @@ Routing case purpose (`evals/circleci/cases/skill-routing-cases.json`):
 - `chunk` cases: ensure Chunk setup and `chunk-cli` prompts route to `chunk` (explicit + implicit).
 - `circleci-testsuite` cases: ensure testsuite, `test-suites.yml`, and legacy test-command migration prompts route to `circleci-testsuite` (explicit + implicit).
 - `circleci-smarter-testing` cases: ensure Smarter Testing, test impact analysis, and dynamic test splitting prompts route to `circleci-smarter-testing` (explicit + implicit).
+- `circleci-deploy-setup` cases: ensure deploy-marker, deploy/rollback pipeline, and release-validation prompts route to `circleci-deploy-setup` (explicit + implicit).
 - negative-control cases: ensure non-CircleCI prompts route to `null`.
 
 ### 2) Local invocation smoke (codex `--json`, not in CI)

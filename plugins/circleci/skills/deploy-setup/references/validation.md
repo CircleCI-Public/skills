@@ -24,10 +24,10 @@ jobs:
               --environment-name="staging" \
               --component-name="my-service" \
               --target-version="${APP_VERSION}"
+      # … deploy step …
       - run:
           name: Update deployment status to running
           command: circleci run release update component-release --status=RUNNING
-      # … deploy step …
       - run:
           name: Update deployment status to failed
           command: circleci run release update component-release --status=FAILED
@@ -169,9 +169,9 @@ The `hook-id` path segment is the organization UUID — the handler rejects any 
 as 403 — so the URL is knowable before any config is committed. That means monitoring can
 be configured before the first deploy.
 
-**The endpoint returns success even when no policy matches.** `processvalidationwebhook`
-logs match failures rather than returning them. A synthetic POST therefore proves the URL,
-the token, and the payload shape, and proves nothing at all about matching.
+**The endpoint returns success even when no policy matches.** Match failures are logged
+server-side, not returned to the caller. A synthetic POST therefore proves the URL, the
+token, and the payload shape, and proves nothing at all about matching.
 
 Only a real deploy proves matching. Finish by running a deploy and inspecting the
 resulting validation plan through

@@ -136,8 +136,12 @@ Two separate limits apply, and confusing them produces bad advice:
 1. **Whether deploy/rollback pipelines exist as a feature** for that integration. Where
    they do not, there is no UI fallback either — the capability is absent, not merely
    un-automated.
-2. **Whether `circleci pipeline create` can make the definition.**
-   `checkout_source.provider` accepts `github_app`, `github_server`, and `bitbucket_dc`.
+2. **Whether `circleci pipeline create` can make the definition.** The two provider lists
+   differ, and neither accepts Bitbucket:
+
+   - `config_source.provider` — `github_app`, `github_server`, `circleci`, `origin`
+   - `checkout_source.provider` — `github_app`, `github_server`, `origin`
+
    Anything else is rejected as an unknown provider.
 
 | Integration | Deploy markers | Deploy + rollback pipelines | Definition via CLI/API |
@@ -147,8 +151,17 @@ Two separate limits apply, and confusing them produces bad advice:
 | GitHub **OAuth**, no App connected | yes | needs the GitHub App | no — connect the App first |
 | GitLab, GitLab self-managed | yes | **not supported** | no |
 | Bitbucket Cloud | yes | **not supported** | no |
-| Bitbucket Data Center | **not supported** | **not supported** | accepted, but moot |
-| Cursor Origin (beta) | yes | **not supported** | no |
+| Bitbucket Data Center | **not supported** | **not supported** | no |
+| Cursor Origin (beta) | yes | **not supported** | yes — see below |
+
+**Origin needs the repo's full name, not just an id.** It exposes no lookup by id, so
+`circleci pipeline create` requires `--config-repo-full-name` and
+`--checkout-repo-full-name` in `owner/name` form alongside the usual flags. Omitting them
+fails even though the provider is accepted.
+
+Note the Origin row is deliberately split: definitions **can** be created, while deploy
+and rollback pipelines are still unavailable there. Creating a definition is not the same
+as the deploys feature working.
 
 So the failure modes are genuinely different, and the thing to say differs with them:
 
@@ -192,9 +205,8 @@ Do not report the exact failure shape as if you knew it; the useful distinction 
 populated versus not. If the project has no definitions at all and you cannot run this
 probe, attempt the create and read the error rather than guessing.
 
-`origin` *is* a valid public-API provider value, but only for
-`GET /api/v3/provider/repositories`, which lists reachable repos. It is not a valid
-config or checkout source, so it does not help here.
+`origin` is also the provider value for `GET /api/v3/provider/repositories`, which lists
+reachable repos and is how you resolve the `owner/name` the create flags need.
 
 ### GitHub OAuth org: connecting the GitHub App
 

@@ -93,11 +93,20 @@ deploys stuck in `RUNNING` forever.
 
 ### Placement
 
-`plan` goes before the deploying step, `RUNNING` immediately after `plan`, and the two
-terminal steps at the end of the job. Markers bracket the step that **performs** the
-deploy, not the setup steps around it — `aws-cli/setup`, `kubernetes/install`, and
-`aws-eks/update_kubeconfig_with_authenticator` prepare for a deploy, they do not perform
-one.
+`plan` goes immediately **before** the deploying step, `RUNNING` immediately **after** it,
+and the two terminal steps at the end of the job:
+
+```text
+plan → <the step that performs the deploy> → RUNNING → SUCCESS / FAILED
+```
+
+Markers bracket the step that **performs** the deploy, not the setup steps around it —
+`aws-cli/setup`, `kubernetes/install`, and `aws-eks/update_kubeconfig_with_authenticator`
+prepare for a deploy, they do not perform one.
+
+`RUNNING` landing after the deploy step reads oddly, and it is deliberate: this is the
+order the guided setup in the web app produces, and matching it is the point of this
+section. Do not "correct" it to `plan → RUNNING → deploy`.
 
 ### Deploy name
 
@@ -121,6 +130,10 @@ Check in this order.
 **Skip** when the job is already fully instrumented:
 
 - it contains both `circleci run release plan` and `circleci run release update`, or
+- it uses the **`circleci/deploys` orb** — a `deploys/plan` or `deploys/log` step, with the
+  orb declared under `orbs:` as `circleci/deploys@…`. The orb emits the marker commands
+  for you, so a job carrying these is instrumented even though it contains no literal
+  `circleci run release` text. See the warning below, or
 - it has `deploy_markers_mode` set to a non-`OFF` value on a supported orb job (see
   `orbs.md`), or
 - it is not a deployment job at all: build, test, lint, publish-without-promotion, or
@@ -152,6 +165,40 @@ explicitly set to `OFF`.
 
 Treat a job whose name contains `build`, `test`, `lint`, or `format-check` as not a
 deployment unless it also contains `deploy`.
+
+### Do not inject on top of the `circleci/deploys` orb
+
+A job using `deploys/plan` or `deploys/log` is **already instrumented**. Matching on the
+literal string `circleci run release` misses it, so a naive scan classifies the job as
+"absent" and injects raw markers alongside the orb's — two plans for one deployment, and
+the second orphans the first.
+
+If the repo uses the orb and the instrumentation is incomplete, say so and let the user
+choose: extend it in orb form, or replace the orb steps with raw markers. Do not mix the
+two in one job.
+
+### Kubernetes: ask before instrumenting
+
+**`kubectl` and `helm` are ambiguous signals.** They mean the job deploys to Kubernetes,
+which splits into two setups that need *different* markers:
+
+| Setup | What to emit |
+|-------|--------------|
+| **CircleCI release agent** (Kubernetes Cluster environment integration) | `plan` **only**, plus a `type: release` job. **No `update` steps at all** |
+| **Agentless** (`kubectl apply` / `helm upgrade` with no agent) | The normal full lifecycle: plan, RUNNING, and the terminal steps |
+
+The official guidance is explicit that `circleci run release update` is for deploy markers
+only, and that with the release agent you must **not** use the `update` commands — the
+agent reports status itself. Emitting them anyway means two writers fighting over one
+release's status.
+
+You cannot tell which setup applies by reading the repo: the agent runs in the cluster,
+not in the config. So **ask**. Useful hints to offer, none conclusive on their own: a
+`circleci.com/version` label on the manifests, Argo Rollouts resources, or an existing
+`release-strategy` setting all suggest the agent.
+
+When the agent is in use, the `on_fail` FAILED step is **not** required, which is the one
+case where invariant 4 in `verification.md` does not apply.
 
 ## Parameter inference
 
@@ -193,8 +240,7 @@ deployment name, or the image name. Falls back to `"${CIRCLE_PROJECT_REPONAME}"`
 ## Invariants after editing
 
 Work through `verification.md`, which has the command for each check.
-Beyond `circleci config validate` there are six, the first three ported from
-`ValidateInjectedJob`:
+Beyond `circleci config validate` there are six:
 
 1. every original non-marker `run` command is still present
 2. there is exactly one `plan` per deployment unit

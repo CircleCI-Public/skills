@@ -49,7 +49,13 @@ extract() {
 comm -23 <(git show HEAD:.circleci/config.yml | extract) <(extract < .circleci/config.yml)
 ```
 
-Any output is a command present before your edit and missing now. Empty output is the pass.
+Any output is a command present before your edit and missing now.
+
+**Empty output is not proof.** `extract` reads only what follows `command:` on the same
+line, so a step written as `command: |` reduces to the single token `|` and its body is
+invisible. Delete a block-form `helm upgrade` and this check still comes back clean. Treat
+it as a cheap scan of inline commands, and let the diff you just read be the real
+evidence.
 
 ## 2. Exactly one `plan` per deployment unit
 
@@ -59,7 +65,13 @@ the first.
 ```bash
 grep -oE 'circleci run release plan[[:space:]]+[^ \\]+' .circleci/*.yml \
   | sed -E 's/.*plan[[:space:]]+//' | tr -d '"' | sort | uniq -c
+grep -nE 'deploys/(plan|log)' .circleci/*.yml
 ```
+
+The second command catches the `circleci/deploys` orb, whose steps carry a plan without
+containing the literal text the first command looks for. **A job with both an orb step and
+a raw `plan` is the duplicate this check exists to find**, and the first command alone
+cannot see it.
 
 Every count must be 1. A count above 1 is legitimate only if the same plan name is planned
 in genuinely separate pipelines — `config.yml` and `deploy.yml` are different files and
@@ -85,7 +97,9 @@ Without an `on_fail` step, a failed deploy sits in `RUNNING` forever.
 grep -nE 'when:[[:space:]]*(on_fail|on_success)' .circleci/*.yml
 ```
 
-- **Every job with a `plan` needs a `when: on_fail` step** marking `FAILED`. No exceptions.
+- **Every job with a `plan` needs a `when: on_fail` step** marking `FAILED`. The single
+  exception is a Kubernetes job using the CircleCI release agent, which must carry no
+  `update` steps at all — see `markers.md`.
 - **`on_success` marking `SUCCESS` is required only when validation is *not* in scope** for
   that plan name. See check 6.
 
@@ -113,8 +127,28 @@ The subtle one. If the deploy job marks `SUCCESS`, the release completes before 
 can evaluate it, so the validation result never affects anything.
 
 ```bash
-grep -nE 'circleci run release update[^|]*--status=SUCCESS' .circleci/*.yml
+grep -nE -- '--status=SUCCESS' .circleci/*.yml
 ```
+
+**Match the flag on its own, not `update … --status=SUCCESS` on one line.** Marker
+commands are routinely written across a line continuation — it is the shape the templates
+in `pipelines.md` emit — and a line-oriented pattern spanning both words silently misses
+them:
+
+```yaml
+command: |
+  circleci run release update my-deploy \
+    --status=SUCCESS
+```
+
+A premature `SUCCESS` is the most damaging mistake this file checks for, so prefer the
+looser pattern and inspect the hits. Matching the flag alone can also flag a comment or a
+rollback job, which the per-hit check below sorts out.
+
+One limit to state rather than paper over: checks 2, 3 and 6 assume a **literal** plan
+name. Where the config uses a variable such as `${DEPLOY_NAME}`, they can compare only the
+variable and not the value it resolves to — report that instead of claiming all six
+invariants passed.
 
 For each hit, check whether that plan name is carried by a `type: release` job with
 `validation.enabled: true`. If it is, **remove the `SUCCESS` step** — success is delegated

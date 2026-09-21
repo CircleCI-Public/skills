@@ -19,6 +19,16 @@ environment:
   TARGET_VERSION: "<< pipeline.deploy.target_version >>"
 ```
 
+Two more exist and are easy to miss, both aimed at rollback:
+
+| Value | Meaning |
+|-------|---------|
+| `pipeline.deploy.current_version` | The version being rolled back **from** |
+| `pipeline.deploy.reason` | The free-text reason entered in the rollback dialog |
+
+Neither is required, but a rollback job that logs `reason` and reports `current_version`
+gives a much more readable audit trail than one that only knows its target.
+
 There is no `pipeline.parameters.component_name`. Writing that fails compilation with
 `Unknown variable(s)`. Always quote the expressions.
 
@@ -44,10 +54,10 @@ deploy-staging-rollback:
         name: Plan rollback
         command: |
           circleci run release plan deploy-staging-rollback \
-            --environment-name=${ENVIRONMENT_NAME} \
-            --namespace=${NAMESPACE} \
-            --component-name=${COMPONENT_NAME} \
-            --target-version=${TARGET_VERSION} \
+            --environment-name="${ENVIRONMENT_NAME}" \
+            --namespace="${NAMESPACE}" \
+            --component-name="${COMPONENT_NAME}" \
+            --target-version="${TARGET_VERSION}" \
             --rollback
     - run:
         name: Perform rollback
