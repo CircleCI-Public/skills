@@ -5,18 +5,26 @@ description: "Agent-driven onboarding guide for CircleCI. Walks a user through t
 
 # CircleCI Onboarding
 
-Guide the user through setting up CircleCI from scratch. Work through the
-stages below **in order**. At each stage, use `AskUserQuestion` to collect
-structured input rather than asking in prose. Run CLI commands to verify state
-before asking questions you can answer yourself. Skip stages that are already
-complete.
+Set a repository up on CircleCI from scratch. **`circleci onboard` does most of
+this in one command**, so the path is short:
+
+1. [Preflight](#1-preflight) — usable CLI, signed-in user
+2. [Choose the organization](#2-choose-the-organization) — the one thing `onboard` cannot work out
+3. [Run `circleci onboard`](#3-run-circleci-onboard) — project, repository, pipeline, trigger
+4. [Get the first pipeline green](#4-get-the-first-pipeline-green) — push, watch, fix, repeat
+
+[Doing it by hand](#doing-it-by-hand) is the fallback for the cases `onboard`
+cannot cover. Reach for it only when step 3 tells you to.
+
+Use `AskUserQuestion` to collect decisions rather than asking in prose, and run
+a CLI check before asking anything you could answer yourself.
 
 **Do not send the user to the web app for anything a command can do.** Every
-stage below resolves its own state through the CLI — the org list, the GitHub
-App connection, the repository ID. The only browser steps are the ones that
-genuinely need a browser: signup/login, and approving the GitHub App install.
-If you catch yourself about to say "go to app.circleci.com and copy X", the
-answer is in this file instead.
+step here resolves its own state through the CLI: the org list, the GitHub App
+connection, the repository ID. The only browser steps are the ones that
+genuinely need a browser: signup, login, and approving an app install. If you
+catch yourself about to say "go to app.circleci.com and copy X", the answer is
+in this file instead.
 
 > This flow assumes the common path: a **GitHub org with the CircleCI GitHub App
 > installed**, one repo, config at `.circleci/config.yml`. When the situation
@@ -26,23 +34,9 @@ answer is in this file instead.
 > explains org type vs pipeline type, the `project follow` webhook trap, central
 > config, URL-orb allow-listing, and CLI teardown limits.
 
-**`circleci onboard` is the same flow in one command.** It generates a config,
-signs the user up, creates and follows the project, and adds a pipeline
-definition plus an all-pushes trigger — and it is idempotent, so it is safe on a
-re-run. It needs a TTY to ask which org to use, so it only completes
-unattended when the account has exactly one org. Two ways to use it:
-
-- The user is at their own terminal: tell them to run `circleci onboard` and
-  answer the prompts. That is the best experience available and you should offer
-  it.
-- You are driving (no TTY): run `circleci onboard --scan` when the account has
-  exactly one org (Stage 2 tells you), and work through the stages below
-  otherwise. They are the non-interactive equivalent, with you asking the
-  questions the CLI would have prompted for.
-
 ---
 
-## Stage 0: Check prerequisites
+## 1. Preflight
 
 ```bash
 circleci version
@@ -66,17 +60,16 @@ sudo snap refresh circleci       # Snap
 ```
 
 Other install methods are listed at
-https://github.com/CircleCI-Public/circleci-cli#installation. Do not proceed
-past this stage if the version check fails.
+https://github.com/CircleCI-Public/circleci-cli#installation. Do not go further
+if the version check fails.
 
-Then run `circleci auth me` before asking anything. If it returns a user, skip
-Stage 1 and note the username.
+Then check for a session:
 
----
+```bash
+circleci auth me
+```
 
-## Stage 1: Account
-
-If not authenticated, ask:
+If it returns a user, note the username and go to step 2. If it doesn't, ask:
 
 ```
 AskUserQuestion(
@@ -99,9 +92,13 @@ browser and then **block for up to 5 minutes waiting for approval**, so:
 `--no-browser` prints the URL without opening anything. Verify with
 `circleci auth me`.
 
+`circleci onboard` signs a user up on its own, so you can also skip straight to
+step 3 and let it handle this. Doing it here means you find out who they are
+before anything is created.
+
 ---
 
-## Stage 2: Organization
+## 2. Choose the organization
 
 List the user's orgs yourself — never ask them to go and find a slug:
 
@@ -132,32 +129,192 @@ This is the one inline source of org **slugs**, which is what `--org` takes.
   To create one, ask for a name, then:
 
   ```bash
-  circleci api api/v2/organization -f name="<org-name>" -f vcs_type=circleci --jq .slug
+  circleci org create <name> --json
   ```
 
-  That is the same endpoint `circleci onboard` uses, and it returns the new
-  org's slug (`circleci/<uuid>`) — a **standalone** org, which is the type that
-  supports GitHub App pipelines. Re-run the collaborations call to confirm.
+  It is a **standalone** org, the type that supports GitHub App pipelines.
 
 A GitHub org is never created this way: a `gh/<org>` org appears on its own once
 you log in with GitHub or install the GitHub App on that GitHub organization. If
-the user expected to see one and doesn't, that is a Stage 3 problem, not an org
-creation problem.
+the user expected to see one and doesn't, that is a connection problem — see
+[GitHub App connection](#github-app-connection).
 
-Note the org slug **and** the org UUID (`.id` from the same call) — Stage 3 and
-Stage 5 both need the UUID.
+Keep the org **slug**. That is all step 3 needs. Keep the org **UUID** (`.id`)
+too if you end up [doing it by hand](#doing-it-by-hand), because those commands
+address the org by UUID.
 
 ---
 
-## Stage 3: GitHub App connection
+## 3. Run `circleci onboard`
 
-Check whether the org is already connected, using the org UUID from Stage 2:
+One command creates the project, follows it, resolves the repository, and adds a
+pipeline definition with an `all-pushes` trigger. It also generates a starter
+config and signs the user up if either is still missing. It is idempotent, so it
+is safe to re-run.
+
+```bash
+circleci onboard --scan --org <org-slug>
+```
+
+Read what it reports before moving on:
+
+| It says | What happened | Do this |
+| --- | --- | --- |
+| `Trigger created` or `Trigger already exists` | Everything is wired up | Go to step 4 |
+| An install URL | The CircleCI GitHub App is not connected, so the project exists but has no pipeline | Give the user the URL, then re-run |
+| A non-zero exit | It names what is missing, and nothing was half-created | Fix that and re-run |
+| `unknown flag: --org` | The installed CLI predates the flag | [Do it by hand](#doing-it-by-hand) |
+
+Two things it does not do:
+
+- **The trigger is always `all-pushes`.** If the user wants a different preset,
+  use [Pipeline definition and trigger](#pipeline-definition-and-trigger)
+  instead of this step.
+- **It stops once the pipeline is wired up.** Step 4 applies either way.
+
+If the user is at their own terminal, plain `circleci onboard` prompts for
+everything, including the organization. That is the nicest version of this, so
+offer it.
+
+---
+
+## 4. Get the first pipeline green
+
+### 4a — Config file
+
+`onboard` writes a starter config, and `config generate` detects the stack
+properly. Either way, don't prompt the user for a config strategy:
+
+```bash
+circleci config generate   # detects the stack; never overwrites an existing config
+circleci config validate
+```
+
+Fix any validation errors before pushing.
+
+**Important:** before using `npm test` as a build step, check `package.json`
+for a `"test"` script. If it's missing, use `npm run build` instead (common
+for Next.js and other frontend-only projects with no test suite).
+
+### 4b — Commit, push, and watch
+
+Do all of this automatically without waiting for user confirmation. Commit the
+whole `.circleci/` directory: `info.yml` records the project's ID, and nothing
+can recover that ID from the project's name later.
+
+```bash
+git add .circleci/
+git commit -m "Add CircleCI config"
+git push
+circleci run watch --sha "$(git rev-parse HEAD)" --failfast
+```
+
+`run watch --sha` polls up to 2 minutes for the trigger to create the run,
+which is exactly the post-push case. If no run ever appears, the trigger didn't
+fire — check that one exists, then start a run directly by definition:
+
+```bash
+circleci pipeline run --project <project-slug> --definition-id <definition-id> \
+  --branch "$(git rev-parse --abbrev-ref HEAD)" --json   # capture .id as <run-id>
+circleci run watch <run-id> --project <project-slug> --failfast
+```
+
+Watch exit codes:
+
+- `0` → passed, go to **Wrap-up**
+- `1` → a job failed, go to 4c
+- `6` → cancelled (ask the user what happened)
+- `7` → the config was rejected, including a dynamic-config continuation — fix
+  the config and go back to 4b
+- `8` → timed out (check whether jobs are stuck)
+
+### 4c — Diagnose and fix (loop)
+
+```bash
+circleci run get --failure-report
+```
+
+That prints condensed output for every failed step and is built for this — it
+is the first thing to run on a red run. Drill further when you need more:
+
+```bash
+circleci run get --json --jq '.workflows[].jobs[] | select(.current_outcome=="failed") | {name,id}'
+circleci job output list <job-id>                      # per-step logs
+circleci job output get <job-id> --step-num <n>         # one step in full
+circleci testresult list <job-id>                       # failed tests only
+```
+
+Read the failure, identify the root cause, edit `.circleci/config.yml`,
+explain the change briefly, then loop back to 4b. Common fixes:
+
+| Symptom | Fix |
+|---|---|
+| `Missing script: "test"` | Replace `npm test` with `npm run build` |
+| Command not found | Add install step or use a different Docker image |
+| Test failures | Verify test command matches repo's actual test runner |
+| Permission denied | `chmod +x` the script, or switch to a non-root image |
+| Config schema error | Fix YAML per `circleci config validate` output |
+| Missing env var | Add it with `circleci envvar set <NAME> <value>` |
+
+Repeat 4b–4c until exit `0`.
+
+---
+
+## Wrap-up
+
+```bash
+circleci run open <run-id>   # open the passing run in the browser (UUID, not a run number)
+```
+
+Tell the user:
+
+- The trigger means **future pushes fire automatically** — no manual
+  `pipeline run` needed.
+- Day-to-day operation from here (watch a run, read failing logs and tests,
+  rerun) is the **circleci-cli** skill.
+- Suggested next steps (offer as a question):
+
+```
+AskUserQuestion(
+  "What would you like to set up next?",
+  header: "Next steps",
+  multiSelect: true,
+  options: [
+    { label: "Secrets / env vars",  description: "Store API keys safely with circleci envvar or contexts" },
+    { label: "Test parallelism",    description: "Split tests across multiple containers to go faster" },
+    { label: "Dependency caching",  description: "Cache node_modules / pip / gradle to speed up builds" },
+    { label: "Orbs",                description: "Reusable config packages for common tools (AWS, Docker, etc.)" }
+  ]
+)
+```
+
+Then help with whatever they select.
+
+---
+
+# Doing it by hand
+
+Everything below is what `circleci onboard` does for you. You need it in three
+cases, and otherwise you should not be here:
+
+- The installed CLI rejected `--org`, so it predates the flag.
+- The user wants a trigger preset other than `all-pushes`.
+- `onboard` reported a blocker you have to clear first, such as the GitHub App
+  not being connected.
+
+These commands address the organization by **UUID**, not slug. Finish at
+[step 4](#4-get-the-first-pipeline-green) once the pipeline exists.
+
+## GitHub App connection
+
+Check whether the org is already connected, using the org UUID from step 2:
 
 ```bash
 circleci api 'provider/connections?filter[org_id]=<org-uuid>' --jq '.data[].attributes.provider'
 ```
 
-If `github_app` is in the output, the app is installed — skip to Stage 4.
+If `github_app` is in the output, the app is installed — go to
+[Project](#project).
 
 If it isn't, ask for a real install URL rather than guessing at an app page.
 This mints a one-hour token, so only call it when the user is about to open it:
@@ -175,9 +332,10 @@ grant it access to the repo they're setting up, then re-run the
 install cannot be driven from here — hand it to the user with
 `circleci onboard` and let its browser flow handle it.
 
----
+Both of these calls need **manage-org** permission on the organization, so a
+user who is not an org admin will be refused here and needs one to install it.
 
-## Stage 4: Project
+## Project
 
 Ask:
 
@@ -216,9 +374,7 @@ checkout at the existing project with
 `circleci project link --project <org-slug>/<project-id>` (add `--force` if
 `.circleci/info.yml` already exists) and carry on.
 
----
-
-## Stage 5: Pipeline definition + trigger
+## Pipeline definition and trigger
 
 You need the provider's repository ID. Resolve it through CircleCI — the org's
 GitHub App connection already knows it, so `gh` is not required:
@@ -228,10 +384,16 @@ circleci api 'provider/repositories?filter[org_id]=<org-uuid>&filter[provider]=g
   --jq '.data[].attributes | select(.repo_full_name=="<owner>/<repo>") | .repo_id'
 ```
 
-If that returns nothing: page through with `page[cursor]` from `.page.next` on
-orgs with many repos; if the repo still isn't listed, the GitHub App hasn't been
-granted access to it (back to Stage 3). Fall back to `gh api /repos/<owner>/<repo> --jq .id`
-if `gh` is available, and only then ask the user for the ID.
+There is no name filter on that endpoint, so an org with more than 100 repos has
+to be paged: take `.page.next` and send it as `page[cursor]`, and **drop
+`page[limit]` when you do** — a limit that differs from the one encoded in the
+cursor is rejected.
+
+If the repo still isn't listed, either the GitHub App hasn't been granted access
+to it, or your own credential can't see it: this endpoint returns what the
+**calling user** can reach, so two members of one org get different lists. Fall
+back to `gh api /repos/<owner>/<repo> --jq .id` if `gh` is available, and only
+then ask the user for the ID.
 
 Ask which trigger preset to use, then create both the definition and the
 trigger without any further confirmation:
@@ -279,131 +441,14 @@ circleci project trigger create \
 Save the pipeline definition `id`. Both commands are safe to re-run only after
 checking for what already exists — `circleci pipeline list` and
 `circleci project trigger list --pipeline-definition-id <id>` — otherwise you
-get duplicates that cross-fire on every push. Proceed to Stage 6.
+get duplicates that cross-fire on every push.
 
 > Pipeline definitions and triggers are **GitHub App only**. In an OAuth-only
-> `gh/` org or a `bb/` org, this stage does not apply: the project's single
-> classic pipeline runs on push once the project is followed, and Stage 4 was
-> the last setup step. Skip to Stage 6 and just push.
+> `gh/` org or a `bb/` org, none of this applies: the project's single classic
+> pipeline runs on push once the project is followed, so [Project](#project) was
+> the last setup step.
 
----
-
-## Stage 6: Config — create and iterate until green
-
-### 6a — Config file
-
-Check if `.circleci/config.yml` already exists. If not, generate it without
-asking — do not prompt the user for a config strategy:
-
-```bash
-circleci config generate   # detects the stack; never overwrites an existing config
-```
-
-Then always validate:
-
-```bash
-circleci config validate
-```
-
-Fix any validation errors before proceeding.
-
-**Important:** before using `npm test` as a build step, check `package.json`
-for a `"test"` script. If it's missing, use `npm run build` instead (common
-for Next.js and other frontend-only projects with no test suite).
-
-### 6b — Commit, push, and watch
-
-Do all of this automatically without waiting for user confirmation. Commit the
-whole `.circleci/` directory: `info.yml` records the project's ID, and nothing
-can recover that ID from the project's name later.
-
-```bash
-git add .circleci/
-git commit -m "Add CircleCI config"
-git push
-circleci run watch --sha "$(git rev-parse HEAD)" --failfast
-```
-
-`run watch --sha` polls up to 2 minutes for the trigger to create the run,
-which is exactly the post-push case. If no run ever appears, the trigger didn't
-fire — check Stage 5, then start one directly by definition:
-
-```bash
-circleci pipeline run --project <project-slug> --definition-id <definition-id> \
-  --branch "$(git rev-parse --abbrev-ref HEAD)" --json   # capture .id as <run-id>
-circleci run watch <run-id> --project <project-slug> --failfast
-```
-
-Watch exit codes:
-
-- `0` → passed, go to **Wrap-up**
-- `1` → a job failed, go to 6c
-- `6` → cancelled (ask the user what happened)
-- `7` → the config was rejected, including a dynamic-config continuation — fix
-  the config and go back to 6b
-- `8` → timed out (check whether jobs are stuck)
-
-### 6c — Diagnose and fix (loop)
-
-```bash
-circleci run get --failure-report
-```
-
-That prints condensed output for every failed step and is built for this — it
-is the first thing to run on a red run. Drill further when you need more:
-
-```bash
-circleci run get --json --jq '.workflows[].jobs[] | select(.current_outcome=="failed") | {name,id}'
-circleci job output list <job-id>                      # per-step logs
-circleci job output get <job-id> --step-num <n>         # one step in full
-circleci testresult list <job-id>                       # failed tests only
-```
-
-Read the failure, identify the root cause, edit `.circleci/config.yml`,
-explain the change briefly, then loop back to 6b. Common fixes:
-
-| Symptom | Fix |
-|---|---|
-| `Missing script: "test"` | Replace `npm test` with `npm run build` |
-| Command not found | Add install step or use a different Docker image |
-| Test failures | Verify test command matches repo's actual test runner |
-| Permission denied | `chmod +x` the script, or switch to a non-root image |
-| Config schema error | Fix YAML per `circleci config validate` output |
-| Missing env var | Add it with `circleci envvar set <NAME> <value>` |
-
-Repeat 6b–6c until exit `0`.
-
----
-
-## Wrap-up
-
-```bash
-circleci run open <run-id>   # open the passing run in the browser (UUID, not a run number)
-```
-
-Tell the user:
-
-- The trigger from Stage 5 means **future pushes fire automatically** — no
-  manual `pipeline run` needed.
-- Day-to-day operation from here (watch a run, read failing logs and tests,
-  rerun) is the **circleci-cli** skill.
-- Suggested next steps (offer as a question):
-
-```
-AskUserQuestion(
-  "What would you like to set up next?",
-  header: "Next steps",
-  multiSelect: true,
-  options: [
-    { label: "Secrets / env vars",  description: "Store API keys safely with circleci envvar or contexts" },
-    { label: "Test parallelism",    description: "Split tests across multiple containers to go faster" },
-    { label: "Dependency caching",  description: "Cache node_modules / pip / gradle to speed up builds" },
-    { label: "Orbs",                description: "Reusable config packages for common tools (AWS, Docker, etc.)" }
-  ]
-)
-```
-
-Then help with whatever they select.
+Then go to [step 4](#4-get-the-first-pipeline-green).
 
 ---
 
@@ -421,8 +466,8 @@ Then help with whatever they select.
   no `project delete`, and no org-setup page to link to.
 - **`circleci api <path>`** resolves relative to `/api/v3`; a path starting with
   `api` is sent as given (which is why the v2 calls above are spelled out in
-  full). Reach for it only where no command covers what you need — as in Stages
-  2, 3 and 5 here.
+  full). Reach for it only where no command covers what you need, as in step 2
+  and in the by-hand steps.
 - **On failure**, surface the raw error, diagnose it, and propose a fix before
   retrying. Auth errors → `circleci auth login`. 404s → check the project slug.
 - **For Bitbucket/OAuth-only/standalone orgs, central config, URL orbs, or
