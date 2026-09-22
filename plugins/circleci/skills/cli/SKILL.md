@@ -1,6 +1,6 @@
 ---
 name: circleci-cli
-description: Day-to-day CircleCI from the terminal with the circleci CLI — authenticate, validate config before you commit, watch the run your push triggered, review pipeline/workflow/job status, read job logs and failed tests, download artifacts, and rerun/cancel/trigger. Use when a developer asks to authenticate CLI access, check their build or pipeline status, watch a run after pushing, see why CI failed, read job output/logs, find failing tests, rerun failed jobs, cancel or re-trigger a run, or validate a config change locally. For first-time project connection / pipeline-definition setup use the onboarding skill; for the diagnose-and-fix methodology on a failing build use circleci-builds.
+description: Day-to-day CircleCI from the terminal with the circleci CLI — authenticate, validate config before you commit, watch the run your push triggered, review pipeline/workflow/job status, read job logs and failed tests, download artifacts, and rerun/cancel/trigger. Use when a developer asks to authenticate CLI access, check their build or pipeline status, watch a run after pushing, see why CI failed, read job output/logs, find failing tests, rerun failed jobs, cancel or re-trigger a run, validate a config change locally, or look up a project's environment variables, contexts, triggers or pipeline definitions. For first-time project connection / pipeline-definition setup use the onboarding skill; for the diagnose-and-fix methodology on a failing build use circleci-builds.
 ---
 
 # CircleCI day-to-day developer workflow (CLI)
@@ -9,8 +9,31 @@ The everyday loop: change config → commit/push → watch the run → read fail
 Almost every command **infers the project from the current git remote and the branch from
 your checked-out branch**, so from inside a repo you rarely pass `--project`/`--branch`.
 
-Preflight once: `circleci version` and `circleci auth me` (auto-reads `$CIRCLE_TOKEN` and
-confirms which user it resolves to, so it doubles as an auth check).
+Every data-returning command takes `--json`, and `--jq '<expr>'` filters it without a
+separate `jq`; human output is markdown. Without a terminal the CLI skips the pager, drops
+color, and fails fast naming the missing flag instead of prompting (for example
+`--value is required in non-interactive mode.`), so there is nothing to set up defensively.
+
+## Preflight and signing in
+
+Run `circleci version`, then `circleci auth me`. It reads `$CIRCLE_TOKEN` (which wins over
+a stored token) and confirms which user it resolves to, so it doubles as the auth check. It
+fails with `No CircleCI API token found` when there is no usable token.
+
+To sign in, run `circleci auth login`. **Don't ask the user for an API token**: the OAuth
+flow needs no secret from them, and pasting tokens into a chat is worse for them than a
+browser round-trip. Without a terminal it opens the authorize page in the user's browser,
+prints the same URL to stderr, then **blocks for up to 5 minutes** waiting for approval:
+
+- Run it in the background, or with a timeout well above your default, not in a foreground
+  call that gives up after a minute or two.
+- Tell the user to approve the request in their browser, and pass along the printed URL in
+  case the window never came to the front. They are watching you, not your tool output.
+- Once they have approved, confirm with `circleci auth me`.
+
+`--no-browser` prints the URL without opening anything. `CI` and `CIRCLE_NO_INTERACTIVE`
+also suppress the browser, since there is no one there to use it; set `CIRCLE_TOKEN` in
+those environments instead.
 
 ## 1. Before you commit — validate locally (fast feedback)
 
@@ -38,8 +61,8 @@ circleci run watch --sha "$(git rev-parse HEAD)"  # match the run for THIS commi
 circleci run watch --failfast                   # bail the moment any job fails
 ```
 `run watch` exit codes make it scriptable: **0** all workflows passed · **1** something
-failed · **6** cancelled · **8** timed out (`--timeout`, default 30m). Chain it:
-`git push && circleci run watch --sha "$(git rev-parse HEAD)"`.
+failed · **6** cancelled · **7** config rejected · **8** timed out (`--timeout`, default
+30m). Chain it: `git push && circleci run watch --sha "$(git rev-parse HEAD)"`.
 
 ## 3. Review your pipelines / runs
 
@@ -92,6 +115,10 @@ CLI flag for it; `circleci run open` gets you there fast.
 | Config error in the UI vs local | validate with `--org` to match private-orb resolution |
 | Everything I triggered lately | `circleci my runs` |
 | Open it in the browser | `circleci run open`, `circleci workflow open`, `circleci job open` |
+| Env var names on the project | `circleci envvar list` |
+| Contexts in the org, and their secrets | `circleci context list`, `circleci context secret list <context>` |
+| Pipeline definitions, and their triggers | `circleci pipeline list`, then `circleci project trigger list --pipeline-definition-id <id>` |
+| Anything not listed here | [`references/api-coverage.md`](references/api-coverage.md) maps each v3 endpoint to its command |
 | CircleCI feature/config syntax question | use the **circleci-config** skill / docs MCP rather than guessing |
 
 ## Gotchas
@@ -103,7 +130,9 @@ CLI flag for it; `circleci run open` gets you there fast.
   `workflow get`), not the job number.
 - `run cancel` takes a run number *or* UUID; pass `--project` when cancelling by number.
 - `circleci api <path>` resolves relative to `/api/v3`; a path starting with `api` is sent as
-  given. Reach for it only when no command covers what you need.
+  given. Reach for it only when no command covers what you need:
+  [`references/api-coverage.md`](references/api-coverage.md) says which endpoints have one.
+  `{project-id}` and `{org-id}` in the path are filled in from the git remote.
 - One execution of a pipeline is a **run** (`run list`, `run get`). `circleci pipeline`
   manages pipeline *definitions*, the config and checkout sources a run executes, so
   `pipeline list` is not where runs live.

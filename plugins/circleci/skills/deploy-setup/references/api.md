@@ -12,13 +12,13 @@ pipeline, or mint a webhook secret. Hand both to the user with instructions from
 create` commands to run themselves. Never block the config work on API access — the repo
 changes are the valuable part and they work regardless.
 
-## Read the official CLI skill first
+## Read the circleci-cli skill first
 
-`CircleCI-Public/circleci-cli` ships a maintained skill at `skills/circleci` covering
-invocation patterns for the CLI: authentication, structured output, project targeting, and
-which command covers each v3 endpoint. **Load it rather than relying on this file for CLI
-mechanics** — it is maintained alongside the binary and this file is not. What follows is
-only the deploy-specific subset.
+The **circleci-cli** skill in this plugin covers CLI mechanics: signing in, structured
+output, and project targeting, and
+[`references/api-coverage.md`](../../cli/references/api-coverage.md) there maps each v3
+endpoint to its command. **Load it rather than relying on this file for CLI mechanics.**
+What follows is only the deploy-specific subset.
 
 ## Check the CLI first
 
