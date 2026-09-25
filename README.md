@@ -1,7 +1,42 @@
-# skills
-CircleCI managed plugins for AI Agents
+# CircleCI skills
 
-# Organization
+CircleCI-managed plugins for AI agents. Two plugins live here: **circleci**, the
+skills for building, debugging and optimizing pipelines, and **chunk**, the
+skills for CircleCI Chunk.
+
+## Install
+
+### Claude Code
+
+Adding the marketplace registers the catalog. Installing the plugin is a
+separate step, and skipping it is why `/reload-plugins` would report no skills:
+
+```
+/plugin marketplace add CircleCI-Public/skills
+/plugin install circleci@circleci-public-skills
+```
+
+Add `chunk@circleci-public-skills` as well for the Chunk skills. The same two
+steps work from a shell with `claude plugin marketplace add` and
+`claude plugin install`.
+
+### Codex
+
+```
+codex plugin marketplace add CircleCI-Public/skills
+codex plugin install circleci
+```
+
+### Any agent that reads SKILL.md
+
+The skills are plain markdown under `plugins/<plugin>/skills/<skill>/SKILL.md`,
+with no plugin runtime required. Point your agent at that directory, or copy the
+ones you want into wherever it looks for skills.
+
+Most of these drive the [circleci CLI](https://github.com/CircleCI-Public/circleci-cli),
+so install that too and run `circleci auth login` once.
+
+## Organization
 
 There's a toplevel codex compatible marketplace meant to facilitate local testing in codex.
 
@@ -9,14 +44,28 @@ The actual plugin in `plugins/circleci` is compatible with existing codex market
 
 ## Coverage
 
-Skills include:
-- general CircleCI build debugging
-- usage of the chunk cli and cloud based modes
-- the circleci CLI day-to-day developer workflow — validate, push, `run watch`, read failing logs/tests, rerun
-- circleci config management and optimization
-- CircleCI Smarter Testing (testsuite) onboarding and `test-suites.yml` setup
-- guided onboarding of a new project to CircleCI (incl. org/pipeline types, `project follow`, central config)
-- deploy setup: deploy markers, deploy/rollback pipelines, release validation and monitoring webhooks
+**circleci**
+
+| Skill | What it covers |
+| --- | --- |
+| `cli` | The day-to-day loop: validate, push, `run watch`, read failing logs and tests, rerun |
+| `builds` | Diagnosing failing builds and flaky pipelines down to a root cause |
+| `debug-ci-failures` | Working through a red pipeline, test results and flaky tests |
+| `config` | Writing and optimizing `.circleci/config.yml` for speed, cost and reliability |
+| `onboard` | Connecting a new repo end to end, including org and pipeline types |
+| `deploy-setup` | Deploy markers, deploy and rollback pipelines, release validation, monitoring webhooks |
+| `testsuite` | Onboarding onto `.circleci/test-suites.yml` and `circleci testsuite run` |
+| `smarter-testing` | Test impact analysis, dynamic test splitting, auto-rerun of failed tests |
+
+**chunk**
+
+| Skill | What it covers |
+| --- | --- |
+| `chunk` | Installing and driving the `chunk` CLI, including cloud mode |
+| `chunk-sidecar-setup` | Standing up a local sidecar |
+| `chunk-sidecar` | Operating it once it is running |
+| `chunk-review` | Reviewing a diff before it lands |
+| `chunk-testing-gaps` | Finding the gaps in a project's test coverage |
 
 ## Manual eval runs
 
