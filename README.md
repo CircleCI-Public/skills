@@ -51,18 +51,20 @@ reads this repository directly and doesn't go through these steps.
 To publish a new listing:
 
 1. Bump `version` in `plugins/circleci/.codex-plugin/plugin.json` and merge it.
-2. Tag that commit on `main` and push the tag:
+2. Tag `main` with that version:
    ```bash
-   git tag circleci-v1.2.0 && git push origin circleci-v1.2.0
+   scripts/tag_codex_release.sh
    ```
-3. The `codex-bundle` job builds `circleci-1.2.0.zip` and stores it as an
-   artifact. It fails if the tag doesn't match the manifest's version.
+   It reads the version from the manifest on `main` and pushes
+   `circleci-v<version>`, or stops if that version was already released.
+3. The `codex-bundle` job builds `circleci-<version>.zip` and stores it as an
+   artifact.
 4. Upload that zip to the Codex portal and publish it.
 
 To see what has landed since the last Codex release:
 
 ```bash
-git log circleci-v1.1.0..main -- plugins/circleci
+git log "$(git describe --tags --abbrev=0 --match 'circleci-v*' origin/main)"..origin/main -- plugins/circleci
 ```
 
 `scripts/build_codex_bundle.sh` builds the same zip from `HEAD` into `dist/`
