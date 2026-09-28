@@ -42,9 +42,13 @@ There's a toplevel codex compatible marketplace meant to facilitate local testin
 
 The actual plugin in `plugins/circleci` is compatible with existing codex marketplaces.
 
-## Releasing to Codex
+## Publishing the Codex directory listing
 
-The Codex listing is a zip uploaded to the portal by hand. To publish one:
+The listing in the Codex plugin directory is a zip uploaded to the portal by
+hand. Installing with `codex plugin marketplace add CircleCI-Public/skills`
+reads this repository directly and doesn't go through these steps.
+
+To publish a new listing:
 
 1. Bump `version` in `plugins/circleci/.codex-plugin/plugin.json` and merge it.
 2. Tag that commit on `main` and push the tag:
