@@ -42,6 +42,28 @@ There's a toplevel codex compatible marketplace meant to facilitate local testin
 
 The actual plugin in `plugins/circleci` is compatible with existing codex marketplaces.
 
+## Releasing to Codex
+
+The Codex listing is a zip uploaded to the portal by hand. To publish one:
+
+1. Bump `version` in `plugins/circleci/.codex-plugin/plugin.json` and merge it.
+2. Tag that commit on `main` and push the tag:
+   ```bash
+   git tag circleci-v1.2.0 && git push origin circleci-v1.2.0
+   ```
+3. The `codex-bundle` job builds `circleci-1.2.0.zip` and stores it as an
+   artifact. It fails if the tag doesn't match the manifest's version.
+4. Upload that zip to the Codex portal and publish it.
+
+To see what has landed since the last Codex release:
+
+```bash
+git log circleci-v1.1.0..main -- plugins/circleci
+```
+
+`scripts/build_codex_bundle.sh` builds the same zip from `HEAD` into `dist/`
+if you want to look at it first.
+
 ## Coverage
 
 **circleci**

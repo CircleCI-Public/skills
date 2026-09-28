@@ -15,7 +15,28 @@ jobs:
           command: |
             evals/circleci/scripts/run_routing_evals_ci.sh
 
+  codex-bundle:
+    docker:
+      - image: cimg/python:3.11
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Build the Codex upload bundle
+          command: scripts/build_codex_bundle.sh circleci
+      - store_artifacts:
+          path: dist
+          destination: codex-bundle
+
 workflows:
   evals:
     jobs:
       - skill-evals
+  codex-release:
+    jobs:
+      - codex-bundle:
+          filters:
+            tags:
+              only: /^circleci-v.+/
+            branches:
+              ignore: /.*/
