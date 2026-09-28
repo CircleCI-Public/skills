@@ -27,4 +27,4 @@ Sources:
 
 - Add or fix `store_test_results`.
 - Upload the same XML with `store_artifacts` while debugging metadata issues.
-- Add `--verbose` to `circleci run testsuite` when debugging.
+- Add `--verbose` to `circleci testsuite run` when debugging.
