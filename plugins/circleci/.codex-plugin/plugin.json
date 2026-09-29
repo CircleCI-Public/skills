@@ -1,7 +1,7 @@
 {
   "name": "circleci",
-  "version": "1.0.0",
-  "description": "Build, test, and deploy any application",
+  "version": "1.1.0",
+  "description": "Build, test and debug CircleCI pipelines. Diagnose failing builds, optimize config for speed and cost, connect a new repo, and speed up test suites.",
   "author": {
     "name": "CircleCI",
     "url": "https://circleci.com"
@@ -17,8 +17,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "CircleCI",
-    "shortDescription": "Build, test, and deploy any application",
-    "longDescription": "Bring testing, deployment, and CI best practices into Codex",
+    "shortDescription": "Build, test and debug CircleCI pipelines",
+    "longDescription": "Build, test and debug CircleCI pipelines. Diagnose failing builds, optimize config for speed and cost, connect a new repo, and speed up test suites.",
     "developerName": "CircleCI",
     "category": "Coding",
     "capabilities": [
