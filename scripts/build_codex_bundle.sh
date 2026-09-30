@@ -32,8 +32,10 @@ mkdir -p "$out"
 # expects.
 #
 # .claude-plugin is excluded: it is the other channel's manifest and would put a
-# second, conflicting source of truth inside the bundle.
-git archive --format=zip --output="$zip_path" "HEAD:${src}" ':(exclude).claude-plugin'
+# second, conflicting source of truth inside the bundle. So are .lsp.json and
+# lsp/, the language server that only Claude Code starts.
+git archive --format=zip --output="$zip_path" "HEAD:${src}" \
+  ':(exclude).claude-plugin' ':(exclude).lsp.json' ':(exclude)lsp'
 
 echo "$zip_path"
 echo "  version  $version"

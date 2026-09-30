@@ -20,6 +20,14 @@ Add `chunk@circleci-public-skills` as well for the Chunk skills. The same two
 steps work from a shell with `claude plugin marketplace add` and
 `claude plugin install`.
 
+The circleci plugin also runs the
+[CircleCI YAML language server](https://github.com/CircleCI-Public/circleci-yaml-language-server),
+so Claude sees config errors after each edit and can look up jobs, commands and
+orbs by name. It downloads the server the first time it edits a YAML file, and
+checks once a day for a newer release. That needs `curl` or `wget` on macOS and
+Linux, and PowerShell on Windows, which every supported Windows has. To pin a
+version, set `CIRCLECI_YAML_LSP_VERSION`.
+
 ### Codex
 
 ```
