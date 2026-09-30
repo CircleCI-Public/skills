@@ -28,10 +28,44 @@ jobs:
           path: dist
           destination: codex-bundle
 
+  # The language server wrapper downloads and starts the server, so run it for
+  # real: on dash, the /bin/sh of Debian and Ubuntu, and on Windows through the
+  # .cmd that Claude Code starts there.
+  lsp-wrapper-unix:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Install and start the language server
+          command: |
+            export CIRCLECI_YAML_LSP_DIR="$(mktemp -d)"
+            dash plugins/circleci/lsp/circleci-yaml-lsp -version
+            dash plugins/circleci/lsp/circleci-yaml-lsp -version
+
+  lsp-wrapper-windows:
+    machine:
+      image: windows-server-2022-gui:current
+    resource_class: windows.medium
+    shell: cmd.exe
+    steps:
+      - checkout
+      - run:
+          name: Install and start the language server
+          command: |
+            set "CIRCLECI_YAML_LSP_DIR=%TEMP%\lsp-test"
+            call plugins\circleci\lsp\circleci-yaml-lsp.cmd -version || exit /b 1
+            call plugins\circleci\lsp\circleci-yaml-lsp.cmd -version || exit /b 1
+
 workflows:
   evals:
     jobs:
       - skill-evals
+  lsp-wrapper:
+    jobs:
+      - lsp-wrapper-unix
+      - lsp-wrapper-windows
   codex-release:
     jobs:
       - codex-bundle:

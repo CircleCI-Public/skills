@@ -1,0 +1,14 @@
+{
+  "circleci-yaml": {
+    "command": "${CLAUDE_PLUGIN_ROOT}/lsp/circleci-yaml-lsp",
+    "args": ["-stdio", "-debug=false"],
+    "extensionToLanguage": {
+      ".yml": "yaml",
+      ".yaml": "yaml"
+    },
+    "initializationOptions": {
+      "userAgent": "circleci-claude-code-plugin"
+    },
+    "startupTimeout": 120000
+  }
+}

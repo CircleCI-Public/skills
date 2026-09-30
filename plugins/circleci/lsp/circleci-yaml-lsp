@@ -1,0 +1,144 @@
+#!/bin/sh
+# Start the CircleCI YAML language server, downloading it first if need be.
+#
+# The latest version comes from CircleCI's tool releases API, checked at most
+# once a day, and the binary from the server's GitHub release, checked against
+# the release's checksums.txt. If the check or the download fails, the version
+# already installed is started instead, so an offline start still works.
+#
+# The editor talks to the server over stdout, so everything this script says
+# goes to stderr.
+#
+# Written for POSIX sh, curl or wget, and any one of sha256sum, shasum, sha256
+# or openssl, so it runs on macOS, glibc and musl Linux, and BusyBox. Windows
+# runs circleci-yaml-lsp.cmd instead.
+#
+# Environment:
+#   CIRCLECI_YAML_LSP_VERSION  run this version rather than the latest
+#   CIRCLECI_YAML_LSP_DIR      where to install (default: the plugin's data
+#                              directory, else ~/.cache/circleci)
+set -u
+
+repo=CircleCI-Public/circleci-yaml-language-server
+api='https://circleci.com/api/v3/tool/releases?filter%5Btool%5D=circleci-yaml-language-server'
+
+say() { printf 'circleci-yaml-lsp: %s\n' "$*" >&2; }
+die() { say "$*"; exit 1; }
+
+case $(uname -s) in
+  Darwin) os=darwin ;;
+  Linux) os=linux ;;
+  *) die "there is no release for $(uname -s)" ;;
+esac
+case $(uname -m) in
+  x86_64 | amd64) arch=amd64 ;;
+  arm64 | aarch64) arch=arm64 ;;
+  *) die "there is no release for $(uname -m)" ;;
+esac
+asset="${os}-${arch}-lsp"
+bin=circleci-yaml-lsp
+
+dir="${CIRCLECI_YAML_LSP_DIR:-${CLAUDE_PLUGIN_DATA:-${XDG_CACHE_HOME:-$HOME/.cache}/circleci}}/yaml-language-server"
+mkdir -p "$dir" || die "can't create $dir"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# fetch URL FILE
+fetch() {
+  if have curl; then
+    curl -fsSL --retry 2 --connect-timeout 10 -o "$2" "$1"
+  elif have wget; then
+    wget -q -T 30 -O "$2" "$1"
+  else
+    say "downloading needs curl or wget"
+    return 1
+  fi
+}
+
+# latest prints the version the releases API says is the latest.
+latest() {
+  if have curl; then
+    curl -fsSL --connect-timeout 5 --max-time 15 "$api"
+  elif have wget; then
+    wget -q -T 15 -O - "$api"
+  else
+    say "downloading needs curl or wget"
+  fi | tr -d '\n' | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+}
+
+# sha256 FILE prints the file's SHA-256 digest.
+sha256() {
+  if have sha256sum; then
+    sha256sum "$1"
+  elif have shasum; then
+    shasum -a 256 "$1"
+  elif have sha256; then
+    sha256 -q "$1"
+  elif have openssl; then
+    openssl dgst -sha256 -r "$1"
+  else
+    say "checking the download needs sha256sum, shasum, sha256 or openssl"
+    return 1
+  fi | { read -r sum _ && printf '%s\n' "$sum"; }
+}
+
+valid() {
+  case $1 in
+    '' | *[!0-9A-Za-z._-]*) return 1 ;;
+  esac
+}
+
+# install VERSION downloads and verifies VERSION, then makes it current.
+install() {
+  tmp="$dir/.download.$$"
+  rm -rf "$tmp" && mkdir "$tmp" || return 1
+  trap 'rm -rf "$tmp"' EXIT
+  url="https://github.com/$repo/releases/download/$1"
+  say "downloading $1 from $url"
+  fetch "$url/checksums.txt" "$tmp/checksums.txt" || return 1
+  fetch "$url/$asset" "$tmp/$asset" || return 1
+  want=$(awk -v a="$asset" '$2 == a || $2 == "*" a { print $1; exit }' "$tmp/checksums.txt")
+  [ -n "$want" ] || { say "checksums.txt for $1 doesn't list $asset"; return 1; }
+  got=$(sha256 "$tmp/$asset") || return 1
+  [ "$got" = "$want" ] || { say "$asset for $1 doesn't match checksums.txt"; return 1; }
+  chmod +x "$tmp/$asset" && mkdir -p "$dir/$1" && mv -f "$tmp/$asset" "$dir/$1/$bin" || return 1
+  rm -rf "$tmp"
+}
+
+# use VERSION records VERSION as the one to start and removes the others.
+# Unix lets a running binary be deleted, so another session's server is safe.
+use() {
+  printf '%s\n' "$1" >"$dir/current.$$" && mv -f "$dir/current.$$" "$dir/current"
+  for old in "$dir"/*/; do
+    [ "$old" = "$dir/$1/" ] || rm -rf "$old"
+  done 2>/dev/null
+}
+
+current=$(cat "$dir/current" 2>/dev/null)
+valid "$current" && [ -x "$dir/$current/$bin" ] || current=
+
+if [ -n "${CIRCLECI_YAML_LSP_VERSION:-}" ]; then
+  version=$CIRCLECI_YAML_LSP_VERSION
+  valid "$version" || die "CIRCLECI_YAML_LSP_VERSION isn't a version: $version"
+elif [ -n "$current" ] && [ -n "$(find "$dir/checked" -mtime -1 2>/dev/null)" ]; then
+  version=$current
+else
+  version=$(latest)
+  if ! valid "$version"; then
+    [ -n "$current" ] || die "couldn't find the latest release at $api"
+    say "couldn't check for a newer release; starting $current"
+    version=$current
+  fi
+  touch "$dir/checked"
+fi
+
+if [ ! -x "$dir/$version/$bin" ] && ! install "$version"; then
+  [ -n "$current" ] || die "couldn't install $version"
+  say "couldn't install $version; starting $current"
+  version=$current
+fi
+if [ -z "${CIRCLECI_YAML_LSP_VERSION:-}" ] && [ "$version" != "$current" ]; then
+  use "$version"
+fi
+
+exec "$dir/$version/$bin" "$@"
