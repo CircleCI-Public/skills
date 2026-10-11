@@ -15,15 +15,15 @@ circleci testsuite doctor "<suite name>" --json
 
 Doctor's `action_items` say exactly what's wrong and how to fix it. Apply the fix, rerun doctor, repeat until `checks` all pass. Never run the project's raw test command or the YAML's `discover`/`run` directly to validate — always go through doctor.
 
-- **No config found** — use doctor's starter `test-suites.yml`, adapted to the project's real test runner. If a test step already exists (raw `npm test`/`pytest`/`go test`, or legacy `circleci tests split`/`circleci tests run`), base `discover`/`run` on it rather than inventing a new one.
+- **No config found** — use doctor's starter `test-suites.yml`, adapted to the project's real test runner. If a test step already exists (raw `npm test`/`pytest`/`go test`, or legacy `circleci tests split`/`circleci tests run`), base `discover`/`run` on it rather than inventing a new one. Doctor's starters often include `options.store-test-results: true` — keep that line when present. Either the `store-test-results` option or a classic `store_test_results` job step is valid and equivalent; use one, not both.
 - **JUnit atoms not matching results** — usually the reporter isn't emitting a `file` attribute per test case. Fix at the source, e.g. `JEST_JUNIT_ADD_FILE_ATTRIBUTE=true` for jest-junit, or `--override-ini=junit_family=xunit1` for pytest.
-- Ignore any `next_steps` about test impact analysis, dynamic test splitting, auto-rerun, or `store-test-results` — paid features, out of scope here, owned by `circleci-smarter-testing`.
+- Ignore any `next_steps` about test impact analysis, dynamic test splitting, or auto-rerun — those belong to `circleci-smarter-testing`. Do not invent those options yourself.
 
-Once doctor is clean: replace the old test step in `.circleci/config.yml` with `circleci testsuite run "<suite name>"`, and remove now-redundant legacy test-split steps. Leave any existing `store_test_results` job step as-is — `circleci-smarter-testing` replaces it later with `options: store-test-results: true`. Tell the user testsuite is onboarded and that `circleci-smarter-testing` can add test impact analysis, dynamic test splitting, or auto-rerun on top.
+Once doctor is clean: replace the old test step in `.circleci/config.yml` with `circleci testsuite run "<suite name>"`, and remove now-redundant legacy test-split steps. Either `options.store-test-results: true` or a classic `store_test_results` job step is enough (same outcome). If the option is set, remove any classic `store_test_results` job step. If the suite has no `store-test-results` option yet, leave an existing `store_test_results` step as-is. Tell the user testsuite is onboarded and that `circleci-smarter-testing` can add test impact analysis, dynamic test splitting, or auto-rerun on top.
 
 ## Guardrails
 
-- Do not add any `options:` (`store-test-results`, `test-impact-analysis`, `dynamic-test-splitting`, `max-auto-rerun`) — all Smarter Testing features, paid and free, are out of scope for this skill.
+- Do not add `test-impact-analysis`, `dynamic-test-splitting`, or `max-auto-rerun` — those belong to `circleci-smarter-testing`. Keeping `store-test-results: true` from doctor's starter is allowed; do not invent other `options:` yourself.
 - No secrets in `test-suites.yml` — use contexts/env vars.
 - Hand off CLI install/auth issues to `circleci-cli`, other config/caching/workspace work to `circleci-config`, and CI failures after a doctor-clean config to `circleci-builds`.
 
