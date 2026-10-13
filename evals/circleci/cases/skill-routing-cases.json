@@ -73,6 +73,20 @@
         "dynamic parallelism"
       ]
     },
+    "circleci-smarter-testing-debugging": {
+      "phrases": [
+        "testsuite impact",
+        "testsuite result",
+        "impact data",
+        "test selection",
+        "was selected",
+        "was skipped",
+        "get skipped",
+        "didn't run",
+        "which tests a file impacts",
+        "which files impact"
+      ]
+    },
     "onboarding": {
       "phrases": [
         "onboard my repo",
@@ -179,6 +193,18 @@
     {
       "prompt": "Set up CircleCI Smarter Testing's auto rerun failed tests feature for our testsuite.",
       "expected": "circleci-smarter-testing-onboarding"
+    },
+    {
+      "prompt": "Use $circleci-smarter-testing-debugging to explain why this test atom was skipped in my last job.",
+      "expected": "circleci-smarter-testing-debugging"
+    },
+    {
+      "prompt": "Why was this test skipped by test selection after I changed src/api/handlers.ts?",
+      "expected": "circleci-smarter-testing-debugging"
+    },
+    {
+      "prompt": "Show me which files impact this test in our impact data.",
+      "expected": "circleci-smarter-testing-debugging"
     },
     {
       "prompt": "I have a new repo and want to get started with CircleCI — walk me through connecting it.",
