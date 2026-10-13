@@ -90,8 +90,8 @@ if you want to look at it first.
 | `config` | Writing and optimizing `.circleci/config.yml` for speed, cost and reliability |
 | `onboard` | Connecting a new repo end to end, including org and pipeline types |
 | `deploy-setup` | Deploy markers, deploy and rollback pipelines, release validation, monitoring webhooks |
-| `testsuite` | Onboarding onto `.circleci/test-suites.yml` and `circleci testsuite run` |
-| `smarter-testing` | Test impact analysis, dynamic test splitting, auto-rerun of failed tests |
+| `smarter-testing-onboarding` | Onboarding onto Smarter Testing: `.circleci/test-suites.yml`, `circleci testsuite run`, and choosing which credit-charged capabilities to enable |
+| `smarter-testing-debugging` | Explaining test selection and test runs with `circleci testsuite impact` and `circleci testsuite result` |
 
 **chunk**
 
@@ -123,8 +123,8 @@ Routing case purpose (`evals/circleci/cases/skill-routing-cases.json`):
 - `circleci-cli` cases: ensure CLI/auth/rerun/command-line prompts route to `circleci-cli` (explicit + implicit).
 - `circleci-config` cases: ensure `.circleci/config.yml`, caching, workspace, and runtime optimization prompts route to `circleci-config` (explicit + implicit).
 - `chunk` cases: ensure Chunk setup and `chunk-cli` prompts route to `chunk` (explicit + implicit).
-- `circleci-testsuite` cases: ensure testsuite, `test-suites.yml`, and legacy test-command migration prompts route to `circleci-testsuite` (explicit + implicit).
-- `circleci-smarter-testing` cases: ensure Smarter Testing, test impact analysis, and dynamic test splitting prompts route to `circleci-smarter-testing` (explicit + implicit).
+- `circleci-smarter-testing-onboarding` cases: ensure testsuite, `test-suites.yml`, legacy test-command migration, Smarter Testing, test impact analysis, and dynamic test splitting prompts route to `circleci-smarter-testing-onboarding` (explicit + implicit).
+- `circleci-smarter-testing-debugging` cases: ensure impact data, test selection, and skipped-test prompts route to `circleci-smarter-testing-debugging` (explicit + implicit).
 - `circleci-deploy-setup` cases: ensure deploy-marker, deploy/rollback pipeline, and release-validation prompts route to `circleci-deploy-setup` (explicit + implicit).
 - negative-control cases: ensure non-CircleCI prompts route to `null`.
 
@@ -150,8 +150,7 @@ Invocation smoke case purpose (`evals/circleci/cases/skill-invocation-smoke-case
 - `builds-explicit-smoke`: validate explicit `$circleci-builds` prompt selects `circleci-builds`.
 - `chunk-explicit-smoke`: validate explicit `$chunk` prompt selects `chunk`.
 - `cli-implicit-smoke`: validate CLI intent prompt selects `circleci-cli` without explicit skill mention.
-- `testsuite-explicit-smoke`: validate explicit `$circleci-testsuite` prompt selects `circleci-testsuite`.
-- `smarter-testing-explicit-smoke`: validate explicit `$circleci-smarter-testing` prompt selects `circleci-smarter-testing`.
+- `testsuite-explicit-smoke` / `smarter-testing-explicit-smoke`: validate explicit `$circleci-smarter-testing-onboarding` prompts for testsuite setup and capability setup select `circleci-smarter-testing-onboarding`.
 - `negative-control-smoke`: validate unrelated prompt reports `none`.
 
 ### 3) Trace evals (full codex `--json` capture + grading, optional)
@@ -163,7 +162,6 @@ evals/circleci/scripts/run_trace_capture_evals_local.sh
 Trace case purpose (`evals/circleci/cases/trace-cases.json`):
 - validate codex capture preflight and JSONL artifact generation for explicit and implicit prompts.
 - validate grading behavior for expected skill mention and negative controls.
-- `testsuite-explicit` / `testsuite-implicit`: validate `$circleci-testsuite` and legacy test-command migration prompts.
-- `smarter-testing-implicit`: validate CircleCI Smarter Testing (test impact analysis, dynamic test splitting) prompts route to `circleci-smarter-testing`.
+- `testsuite-explicit` / `testsuite-implicit` / `smarter-testing-implicit`: validate `$circleci-smarter-testing-onboarding`, legacy test-command migration, and Smarter Testing capability prompts route to `circleci-smarter-testing-onboarding`.
 
 If codex preflight fails with a network error, verify that `codex exec` can reach OpenAI endpoints from your environment.

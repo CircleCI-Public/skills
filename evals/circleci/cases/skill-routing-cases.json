@@ -58,22 +58,33 @@
         "chunk auth"
       ]
     },
-    "circleci-testsuite": {
+    "circleci-smarter-testing-onboarding": {
       "phrases": [
         "testsuite",
         "test-suites.yml",
         "discover command",
         "run command",
         "migrate test command",
-        "circleci tests split"
-      ]
-    },
-    "circleci-smarter-testing": {
-      "phrases": [
+        "circleci tests split",
         "smarter testing",
         "test impact analysis",
         "dynamic test splitting",
-        "auto rerun failed tests"
+        "auto rerun failed tests",
+        "dynamic parallelism"
+      ]
+    },
+    "circleci-smarter-testing-debugging": {
+      "phrases": [
+        "testsuite impact",
+        "testsuite result",
+        "impact data",
+        "test selection",
+        "was selected",
+        "was skipped",
+        "get skipped",
+        "didn't run",
+        "which tests a file impacts",
+        "which files impact"
       ]
     },
     "onboarding": {
@@ -164,24 +175,36 @@
       "expected": "chunk"
     },
     {
-      "prompt": "Use $circleci-testsuite to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
-      "expected": "circleci-testsuite"
+      "prompt": "Use $circleci-smarter-testing-onboarding to add testsuite, test-suites.yml, and wire JUnit for our Vitest project.",
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "Help us onboard this repo onto CircleCI's testsuite with discover and run commands and doctor validation.",
-      "expected": "circleci-testsuite"
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "Migrate our old circleci tests split test step over to the new testsuite command.",
-      "expected": "circleci-testsuite"
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "We want dynamic test splitting and test impact analysis for our testsuite in CircleCI.",
-      "expected": "circleci-smarter-testing"
+      "expected": "circleci-smarter-testing-onboarding"
     },
     {
       "prompt": "Set up CircleCI Smarter Testing's auto rerun failed tests feature for our testsuite.",
-      "expected": "circleci-smarter-testing"
+      "expected": "circleci-smarter-testing-onboarding"
+    },
+    {
+      "prompt": "Use $circleci-smarter-testing-debugging to explain why this test atom was skipped in my last job.",
+      "expected": "circleci-smarter-testing-debugging"
+    },
+    {
+      "prompt": "Why was this test skipped by test selection after I changed src/api/handlers.ts?",
+      "expected": "circleci-smarter-testing-debugging"
+    },
+    {
+      "prompt": "Show me which files impact this test in our impact data.",
+      "expected": "circleci-smarter-testing-debugging"
     },
     {
       "prompt": "I have a new repo and want to get started with CircleCI — walk me through connecting it.",

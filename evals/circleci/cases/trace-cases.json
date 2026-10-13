@@ -32,20 +32,20 @@
     },
     {
       "id": "testsuite-explicit",
-      "prompt": "Use $circleci-testsuite to add testsuite with discover, run, junit outputs, and doctor checks for this repository.",
-      "expected_skill": "circleci-testsuite",
+      "prompt": "Use $circleci-smarter-testing-onboarding to add testsuite with discover, run, junit outputs, and doctor checks for this repository.",
+      "expected_skill": "circleci-smarter-testing-onboarding",
       "trigger_type": "explicit"
     },
     {
       "id": "testsuite-implicit",
       "prompt": "We are migrating our raw test command to CircleCI's testsuite and need test-suites.yml plus config.yml wiring.",
-      "expected_skill": "circleci-testsuite",
+      "expected_skill": "circleci-smarter-testing-onboarding",
       "trigger_type": "implicit"
     },
     {
       "id": "smarter-testing-implicit",
       "prompt": "We already have a testsuite set up and now want CircleCI Smarter Testing's test impact analysis and dynamic test splitting.",
-      "expected_skill": "circleci-smarter-testing",
+      "expected_skill": "circleci-smarter-testing-onboarding",
       "trigger_type": "implicit"
     }
   ]
