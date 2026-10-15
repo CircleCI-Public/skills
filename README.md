@@ -44,6 +44,19 @@ ones you want into wherever it looks for skills.
 Most of these drive the [circleci CLI](https://github.com/CircleCI-Public/circleci-cli),
 so install that too and run `circleci auth login` once.
 
+### Neotask
+
+Both plugins are on Neotask Construct, as
+[circleci](https://construct.neotask.ai/p/circleci) and
+[circleci-chunk](https://construct.neotask.ai/p/circleci-chunk). Install with the
+Neotask CLI, or from the Neotask desktop app under Agents > Skills > Add-ons:
+
+```
+neotask construct install circleci
+```
+
+Add `circleci-chunk` as well for the Chunk skills.
+
 ## Organization
 
 There's a toplevel codex compatible marketplace meant to facilitate local testing in codex.
