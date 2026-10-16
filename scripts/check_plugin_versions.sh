@@ -7,7 +7,7 @@
 #   - if its files other than CHANGELOG.md differ from where the branch left
 #     main, its version differs too
 #   - its Claude Code and Codex manifests carry the same version
-#   - its CHANGELOG.md has a "## <version>" entry
+#   - its CHANGELOG.md has a non-empty "## <version>" entry
 #
 # On main nothing differs from the merge base, so only the last two apply there.
 set -euo pipefail
@@ -16,8 +16,12 @@ json_version() {
   python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])'
 }
 
-git fetch --quiet origin main
-base=$(git merge-base origin/main HEAD)
+# The explicit refspec creates origin/main even in a single-branch clone.
+git fetch --quiet origin +refs/heads/main:refs/remotes/origin/main
+base=$(git merge-base origin/main HEAD) || {
+  echo "Found no common commit with origin/main. Is this a shallow clone?" >&2
+  exit 1
+}
 status=0
 
 for dir in plugins/*/; do
@@ -48,8 +52,11 @@ for dir in plugins/*/; do
     fi
   fi
 
-  if ! awk -v v="$version" '$1 == "##" && $2 == v { found = 1 } END { exit !found }' "$changelog" 2>/dev/null; then
-    echo "$plugin: $changelog has no \"## $version\" entry." >&2
+  # The same section tag_release.sh uses as release notes, which must not be
+  # empty.
+  if ! awk -v v="$version" '$1 == "##" { if (on) exit; on = ($2 == v); next }
+      on && NF { found = 1 } END { exit !found }' "$changelog" 2>/dev/null; then
+    echo "$plugin: $changelog has no \"## $version\" entry, or it is empty." >&2
     status=1
   fi
 done

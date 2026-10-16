@@ -9,24 +9,18 @@
 # zip for the Codex directory listing.
 set -euo pipefail
 
-# Checked first: once the tag is pushed, a rerun stops at "already exists".
+# Checked before anything is pushed, so a missing login doesn't leave a tag
+# without a release.
 gh auth status >/dev/null
 
 plugin="${1:-circleci}"
 manifest="plugins/${plugin}/.claude-plugin/plugin.json"
 changelog="plugins/${plugin}/CHANGELOG.md"
 
-git fetch --quiet origin main
+git fetch --quiet origin +refs/heads/main:refs/remotes/origin/main
 version=$(git show "origin/main:${manifest}" \
   | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')
 tag="${plugin}-v${version}"
-
-# Refuses if this version was already tagged, which means the manifest on main
-# still needs a version bump.
-if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null; then
-  echo "$tag already exists. Bump \"version\" in $manifest on main first." >&2
-  exit 1
-fi
 
 # The lines under "## <version>", up to the next entry.
 notes=$(git show "origin/main:${changelog}" \
@@ -36,7 +30,18 @@ if [ -z "$notes" ]; then
   exit 1
 fi
 
-git tag "$tag" origin/main
-git push --quiet origin "$tag"
+# A released version means the manifest on main still needs a bump. A tag
+# without a release means an earlier run stopped after pushing it, so this run
+# only creates the release.
+if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null; then
+  if gh release view "$tag" >/dev/null 2>&1; then
+    echo "$tag is already released. Bump \"version\" in $manifest on main first." >&2
+    exit 1
+  fi
+  echo "$tag exists without a release, so creating only the release." >&2
+else
+  git push --quiet origin "origin/main:refs/tags/${tag}"
+fi
+
 gh release create "$tag" --verify-tag --title "$plugin $version" --notes "$notes"
-echo "Pushed and released $tag."
+echo "Released $tag."
