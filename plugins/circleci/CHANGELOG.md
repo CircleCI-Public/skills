@@ -8,6 +8,11 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.4.0 - 2026-10-16
+
+- `cli` tells agents to report CLI errors, missing capabilities and confusing
+  output with `circleci feedback`.
+
 ## 1.3.0 - 2026-10-16
 
 - Merged the `testsuite` and `smarter-testing` skills into one

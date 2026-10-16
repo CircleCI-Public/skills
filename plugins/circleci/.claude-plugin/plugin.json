@@ -1,6 +1,6 @@
 {
   "name": "circleci",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Build, test and debug CircleCI pipelines. Diagnose failing builds, optimize config for speed and cost, connect a new repo, and speed up test suites.",
   "author": {
     "name": "CircleCI",
