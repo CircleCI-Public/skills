@@ -155,6 +155,30 @@ CLI flag for it; `circleci run open` gets you there fast.
 - **If auth/permissions fail, report the exact scope gap** and safest remediation
   (`circleci auth login`, refresh permissions in User Settings) rather than retrying blindly.
 
+## Telling CircleCI when the CLI falls short
+
+`circleci feedback` sends a report to the team that builds the CLI. Send one when the CLI
+itself got in the way of the task:
+
+- An error that looks like CircleCI's fault: a 5xx, or anything the CLI follows with
+  `If this looks like a CircleCI problem, report it: circleci feedback …`.
+- A missing capability: no command covers what you needed, even after checking
+  `circleci help` and [`references/api-coverage.md`](references/api-coverage.md).
+- Confusing output: you misread it, or it contradicted what you found elsewhere.
+
+```bash
+circleci feedback "run get --json listed no jobs for a run the web app shows with three" --tool "run get"
+```
+
+- Say what you were trying to do, what you ran and what happened, quoted as one argument.
+  `--tool` names the command it's about.
+- The report carries the user's CircleCI identity, so describe the CLI's behavior in your
+  own words and keep secrets, env var values and log excerpts out of it.
+- Problems in the user's config or code, or a missing token or permission, belong to the
+  user, not in a report.
+- Send one report per problem, then carry on with the task. If `feedback` fails, or
+  `circleci help` doesn't list it, move on without it.
+
 ## Report back
 
 When you finish, summarize:
@@ -163,3 +187,4 @@ When you finish, summarize:
 2. Key outputs — pipeline/workflow/job ids, status, failing step.
 3. Actions taken (rerun/trigger/validate) and why.
 4. Remaining blockers and the next recommended CLI command.
+5. Any feedback you sent to CircleCI, and what it said.
