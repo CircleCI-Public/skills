@@ -32,7 +32,7 @@ version, set `CIRCLECI_YAML_LSP_VERSION`.
 
 ```
 codex plugin marketplace add CircleCI-Public/skills
-codex plugin install circleci
+codex plugin add circleci@circleci-skills
 ```
 
 ### Any agent that reads SKILL.md
@@ -44,11 +44,75 @@ ones you want into wherever it looks for skills.
 Most of these drive the [circleci CLI](https://github.com/CircleCI-Public/circleci-cli),
 so install that too and run `circleci auth login` once.
 
+## Updating
+
+Each plugin's `CHANGELOG.md` lists what changed in each version. To hear about
+new versions, watch this repository on GitHub for releases.
+
+### Claude Code
+
+Claude Code doesn't update plugins from this marketplace unless you turn on
+auto-update, which is off by default for marketplaces outside Anthropic's own.
+Until then you keep the version you installed.
+
+To turn on auto-update, run `/plugin`, open the **Marketplaces** tab, select
+`circleci-public-skills`, and choose **Enable auto-update**. Claude Code then
+updates the plugins when a session starts, and the new versions load in the
+next session or after `/reload-plugins`.
+
+To update now, choose **Update marketplace** in the same place, or from a shell:
+
+```
+claude plugin marketplace update circleci-public-skills
+claude plugin update circleci@circleci-public-skills
+```
+
+### Codex
+
+Codex keeps the version you installed. Refresh the marketplace, then add the
+plugin again to install the new version, and start a new session to load it:
+
+```
+codex plugin marketplace upgrade circleci-skills
+codex plugin add circleci@circleci-skills
+```
+
+`codex plugin list` shows the installed version.
+
 ## Organization
 
 There's a toplevel codex compatible marketplace meant to facilitate local testing in codex.
 
 The actual plugin in `plugins/circleci` is compatible with existing codex marketplaces.
+
+## Releasing
+
+Installed plugins only update when the `version` in their manifest changes, so
+every change under `plugins/<plugin>/` needs a new version:
+
+1. Bump `version` in `plugins/<plugin>/.claude-plugin/plugin.json`, and in
+   `.codex-plugin/plugin.json` too if the plugin has one. The two stay equal.
+2. Add a `## <version> - <date>` entry to `plugins/<plugin>/CHANGELOG.md`.
+
+The `plugin-versions` job checks both, and fails a branch that changes a plugin
+without them. Run `scripts/check_plugin_versions.sh` to check locally.
+
+After it merges, tag and release it:
+
+```bash
+scripts/tag_release.sh circleci
+```
+
+It reads the version from the manifest on `main`, pushes
+`<plugin>-v<version>`, and creates a GitHub release with the changelog entry as
+its notes. It stops if that version was already released, or if the changelog
+has no entry for it.
+
+To see what has landed since the last release:
+
+```bash
+git log "$(git describe --tags --abbrev=0 --match 'circleci-v*' origin/main)"..origin/main -- plugins/circleci
+```
 
 ## Publishing the Codex directory listing
 
@@ -56,24 +120,9 @@ The listing in the Codex plugin directory is a zip uploaded to the portal by
 hand. Installing with `codex plugin marketplace add CircleCI-Public/skills`
 reads this repository directly and doesn't go through these steps.
 
-To publish a new listing:
-
-1. Bump `version` in `plugins/circleci/.codex-plugin/plugin.json` and merge it.
-2. Tag `main` with that version:
-   ```bash
-   scripts/tag_codex_release.sh
-   ```
-   It reads the version from the manifest on `main` and pushes
-   `circleci-v<version>`, or stops if that version was already released.
-3. The `codex-bundle` job builds `circleci-<version>.zip` and stores it as an
-   artifact.
-4. Upload that zip to the Codex portal and publish it.
-
-To see what has landed since the last Codex release:
-
-```bash
-git log "$(git describe --tags --abbrev=0 --match 'circleci-v*' origin/main)"..origin/main -- plugins/circleci
-```
+A `circleci-v<version>` tag from `scripts/tag_release.sh` starts the
+`codex-bundle` job, which builds `circleci-<version>.zip` and stores it as an
+artifact. Upload that zip to the Codex portal and publish it.
 
 `scripts/build_codex_bundle.sh` builds the same zip from `HEAD` into `dist/`
 if you want to look at it first.
