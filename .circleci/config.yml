@@ -15,6 +15,16 @@ jobs:
           command: |
             evals/circleci/scripts/run_routing_evals_ci.sh
 
+  plugin-versions:
+    docker:
+      - image: cimg/python:3.11
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Check each changed plugin has a new version
+          command: scripts/check_plugin_versions.sh
+
   codex-bundle:
     docker:
       - image: cimg/python:3.11
@@ -62,6 +72,9 @@ workflows:
   evals:
     jobs:
       - skill-evals
+  plugin-versions:
+    jobs:
+      - plugin-versions
   lsp-wrapper:
     jobs:
       - lsp-wrapper-unix

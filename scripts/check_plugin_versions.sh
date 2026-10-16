@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Fail when a plugin changed without a new version.
+#
+# Claude Code and Codex only update an installed plugin when the version in its
+# manifest changes, so a change merged without a bump never reaches anyone who
+# already installed it. For each plugin this checks that:
+#   - if its files other than CHANGELOG.md differ from where the branch left
+#     main, its version differs too
+#   - its Claude Code and Codex manifests carry the same version
+#   - its CHANGELOG.md has a non-empty "## <version>" entry
+#
+# On main nothing differs from the merge base, so only the last two apply there.
+set -euo pipefail
+
+json_version() {
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])'
+}
+
+# The explicit refspec creates origin/main even in a single-branch clone.
+git fetch --quiet origin +refs/heads/main:refs/remotes/origin/main
+base=$(git merge-base origin/main HEAD) || {
+  echo "Found no common commit with origin/main. Is this a shallow clone?" >&2
+  exit 1
+}
+status=0
+
+for dir in plugins/*/; do
+  plugin=$(basename "$dir")
+  claude="${dir}.claude-plugin/plugin.json"
+  codex="${dir}.codex-plugin/plugin.json"
+  changelog="${dir}CHANGELOG.md"
+  version=$(json_version < "$claude")
+
+  manifests="$claude"
+  if [ -f "$codex" ]; then
+    manifests="$claude and $codex"
+    codex_version=$(json_version < "$codex")
+    if [ "$codex_version" != "$version" ]; then
+      echo "$plugin: $claude says $version but $codex says $codex_version." >&2
+      status=1
+    fi
+  fi
+
+  # A plugin that is new on this branch has nothing to bump from. Editing only
+  # the changelog changes nothing a user runs, so it doesn't need a new version.
+  if ! git diff --quiet "$base" -- "$dir" ":(exclude)$changelog" \
+    && git cat-file -e "$base:$claude" 2>/dev/null; then
+    old=$(git show "$base:$claude" | json_version)
+    if [ "$old" = "$version" ]; then
+      echo "$plugin: changed since main but still $version. Bump \"version\" in $manifests." >&2
+      status=1
+    fi
+  fi
+
+  # The same section tag_release.sh uses as release notes, which must not be
+  # empty.
+  if ! awk -v v="$version" '$1 == "##" { if (on) exit; on = ($2 == v); next }
+      on && NF { found = 1 } END { exit !found }' "$changelog" 2>/dev/null; then
+    echo "$plugin: $changelog has no \"## $version\" entry, or it is empty." >&2
+    status=1
+  fi
+done
+
+exit "$status"
