@@ -4,7 +4,8 @@
 # Claude Code and Codex only update an installed plugin when the version in its
 # manifest changes, so a change merged without a bump never reaches anyone who
 # already installed it. For each plugin this checks that:
-#   - if its files differ from where the branch left main, its version differs too
+#   - if its files other than CHANGELOG.md differ from where the branch left
+#     main, its version differs too
 #   - its Claude Code and Codex manifests carry the same version
 #   - its CHANGELOG.md has a "## <version>" entry
 #
@@ -36,8 +37,10 @@ for dir in plugins/*/; do
     fi
   fi
 
-  # A plugin that is new on this branch has nothing to bump from.
-  if ! git diff --quiet "$base" -- "$dir" && git cat-file -e "$base:$claude" 2>/dev/null; then
+  # A plugin that is new on this branch has nothing to bump from. Editing only
+  # the changelog changes nothing a user runs, so it doesn't need a new version.
+  if ! git diff --quiet "$base" -- "$dir" ":(exclude)$changelog" \
+    && git cat-file -e "$base:$claude" 2>/dev/null; then
     old=$(git show "$base:$claude" | json_version)
     if [ "$old" = "$version" ]; then
       echo "$plugin: changed since main but still $version. Bump \"version\" in $manifests." >&2
