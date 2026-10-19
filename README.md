@@ -140,6 +140,7 @@ if you want to look at it first.
 | `onboard` | Connecting a new repo end to end, including org and pipeline types |
 | `deploy-setup` | Deploy markers, deploy and rollback pipelines, release validation, monitoring webhooks |
 | `smarter-testing-onboarding` | Onboarding onto Smarter Testing: `.circleci/test-suites.yml`, `circleci testsuite run`, and choosing which credit-charged capabilities to enable |
+| `smarter-testing-run` | Running tests locally through Smarter Testing with `circleci testsuite run`, narrowed with `--test-atom-pattern` |
 | `smarter-testing-debugging` | Explaining test selection and test runs with `circleci testsuite impact` and `circleci testsuite result` |
 
 **chunk**
@@ -173,6 +174,7 @@ Routing case purpose (`evals/circleci/cases/skill-routing-cases.json`):
 - `circleci-config` cases: ensure `.circleci/config.yml`, caching, workspace, and runtime optimization prompts route to `circleci-config` (explicit + implicit).
 - `chunk` cases: ensure Chunk setup and `chunk-cli` prompts route to `chunk` (explicit + implicit).
 - `circleci-smarter-testing-onboarding` cases: ensure testsuite, `test-suites.yml`, legacy test-command migration, Smarter Testing, test impact analysis, and dynamic test splitting prompts route to `circleci-smarter-testing-onboarding` (explicit + implicit).
+- `circleci-smarter-testing-run` cases: ensure prompts to run tests locally, or a subset of them by test atom pattern, route to `circleci-smarter-testing-run` (explicit + implicit).
 - `circleci-smarter-testing-debugging` cases: ensure impact data, test selection, and skipped-test prompts route to `circleci-smarter-testing-debugging` (explicit + implicit).
 - `circleci-deploy-setup` cases: ensure deploy-marker, deploy/rollback pipeline, and release-validation prompts route to `circleci-deploy-setup` (explicit + implicit).
 - negative-control cases: ensure non-CircleCI prompts route to `null`.
@@ -200,6 +202,7 @@ Invocation smoke case purpose (`evals/circleci/cases/skill-invocation-smoke-case
 - `chunk-explicit-smoke`: validate explicit `$chunk` prompt selects `chunk`.
 - `cli-implicit-smoke`: validate CLI intent prompt selects `circleci-cli` without explicit skill mention.
 - `testsuite-explicit-smoke` / `smarter-testing-explicit-smoke`: validate explicit `$circleci-smarter-testing-onboarding` prompts for testsuite setup and capability setup select `circleci-smarter-testing-onboarding`.
+- `smarter-testing-run-explicit-smoke`: validate explicit `$circleci-smarter-testing-run` prompt selects `circleci-smarter-testing-run`.
 - `negative-control-smoke`: validate unrelated prompt reports `none`.
 
 ### 3) Trace evals (full codex `--json` capture + grading, optional)

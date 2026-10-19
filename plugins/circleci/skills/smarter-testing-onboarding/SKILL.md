@@ -1,11 +1,11 @@
 ---
 name: circleci-smarter-testing-onboarding
-description: Onboard a project onto CircleCI Smarter Testing — write `.circleci/test-suites.yml`, replace the raw test step (or legacy `circleci tests glob`/`split`/`run`) with `circleci testsuite run`, validate with `circleci testsuite doctor`, then ask if any credit-charged capabilities should be enabled (test impact analysis, dynamic test splitting, dynamic parallelism, auto rerun failed tests). Use for first-time setup of Smarter Testing, testsuite, test-suites YAML, or migrating a test step. Not for running or debugging a suite that is already onboarded.
+description: Onboard a project onto CircleCI Smarter Testing — write `.circleci/test-suites.yml`, replace the raw test step (or legacy `circleci tests glob`/`split`/`run`) with `circleci testsuite run`, validate with `circleci testsuite doctor`, make sure the free features work (static test splitting, rerun only failed tests, test uploads), then ask if any credit-charged features should be enabled (test impact analysis, dynamic test splitting, dynamic parallelism, auto rerun failed tests). Use for first-time setup of Smarter Testing, testsuite, test-suites YAML, or migrating a test step. Not for running (circleci-smarter-testing-run) or debugging a suite that is already onboarded.
 ---
 
 # CircleCI Smarter Testing Onboarding
 
-Testsuite replaces a raw test command with `.circleci/test-suites.yml` + `circleci testsuite run "<suite name>"`. This skill gets a suite onboarded and doctor-clean, then enables whichever Smarter Testing features the user asks for. It covers onboarding only, not running or debugging an already onboarded suite.
+Testsuite replaces a raw test command with `.circleci/test-suites.yml` + `circleci testsuite run "<suite name>"`. This skill gets a suite onboarded and doctor-clean, checks the free features work, then enables whichever credit-charged features the user asks for. It covers onboarding only, not running or debugging an already onboarded suite.
 
 Always start with:
 
@@ -23,14 +23,34 @@ Once doctor is clean: replace the old test step in `.circleci/config.yml` with `
 
 ## Smarter Testing features
 
-These features count test atoms toward the plan's monthly allowance, with a credit charge above it (3,000 credits per 100,000 test atoms). Each `circleci testsuite run` with any of them enabled counts its discovered test atoms once. Tell the user this before they choose.
+Smarter Testing has free features, which come with onboarding, and credit-charged features, which the user opts into. The full list is in the [Smarter Testing overview](https://circleci.com/docs/guides/test/smarter-testing-overview/).
+
+### Free, with every suite
+
+Make sure these work once doctor is clean, and tell the user they have them:
+
+- **Static test splitting** — with `parallelism` set on the test job, tests are split across the nodes using timing data from previous runs. Needs no option; check the job's `parallelism` is kept when replacing the old test step.
+- **Rerun only failed tests** — rerunning a workflow from failed reruns only the tests that failed. Needs nothing beyond `circleci testsuite run`.
+- **Test uploads** — uploaded results show on the job's Tests tab and feed Test Insights. Needs `store_test_results` or `options: store-test-results: true`, as above.
+
+### Credit-charged, opt in
+
+Local runs are free. In CI, these count test atoms toward the plan's monthly allowance, with a charge above it of 3,000 credits per 100,000 test atoms:
+
+| Plan        | Test atoms included per month |
+|-------------|-------------------------------|
+| Free        | 1,000                         |
+| Performance | 10,000                        |
+| Scale       | 100,000                       |
+
+Each `circleci testsuite run` in a CI job with any of them enabled counts its discovered test atoms once, however many are enabled and whatever the parallelism. Running the suite locally never costs anything, even though test impact analysis and auto-rerun apply to local runs too; dynamic test splitting and dynamic parallelism only apply in CI. Tell the user both before they choose.
 
 Ask the user which of these they want (don't assume any):
 
-- **Test impact analysis** — run only the tests affected by a change.
-- **Dynamic test splitting** — evenly distribute tests across parallel nodes.
-- **Dynamic parallelism** (experimental) — set the test job's parallelism from the selected tests or a target duration per node.
-- **Auto-rerun failed tests** — automatically retry failures in the same step.
+- **Test impact analysis** — learns which source files impact which tests from coverage, then runs only the tests impacted by a change. Needs an `analysis` command in the suite.
+- **Dynamic test splitting** — distributes tests across parallel nodes from a shared queue as they run, so no node sits idle.
+- **Dynamic parallelism** (experimental) — sets the test job's parallelism when the pipeline runs, from the selected tests or a target duration per node.
+- **Auto-rerun failed tests** — retries failed tests in the same run until they pass or hit the limit.
 
 For each feature the user wants:
 
@@ -41,15 +61,15 @@ For each feature the user wants:
    circleci testsuite run "<suite name>" --analyze-tests=impacted
    ```
 
-Once test impact analysis is enabled and seeded, recommend the user replace their everyday local test command (`npm test`, `pytest`, `go test`, etc.) with `circleci testsuite run "<suite name>" --local` — it uses locally stored impact data, so local runs select only the tests impacted by uncommitted changes, same as CI.
+Once test impact analysis is enabled and seeded, recommend the user replace their everyday local test command (`npm test`, `pytest`, `go test`, etc.) with `circleci testsuite run "<suite name>"`, which selects only the tests their changes impact, same as CI. Running the suite from then on, including when to fall back to `--local`, is owned by `circleci-smarter-testing-run`.
 
 ## Guardrails
 
 - Only enable the features the user actually asked for — don't turn on test impact analysis, dynamic test splitting, dynamic parallelism, or auto-rerun speculatively.
-- `circleci testsuite doctor "<suite name>"` is the only command that executes tests during setup, except the one-time seed step and the `--local` dev-loop recommendation above.
+- `circleci testsuite doctor "<suite name>"` is the only command that executes tests during setup, except the one-time seed step and the dev-loop recommendation above.
 - No secrets in `test-suites.yml` — use contexts/env vars. Don't commit local impact data under `.circleci/`.
 - Hand off CLI install/auth issues to `circleci-cli`, other config/caching/workspace work to `circleci-config`, and CI failures after a doctor-clean config to `circleci-builds`.
 
 ## Output Contract
 
-Remove extraneous files created during setup. Report which features were enabled, files changed, the final doctor output, and any blocked prerequisites.
+Remove extraneous files created during setup. Report the free features in place, which credit-charged features were enabled, files changed, the final doctor output, and any blocked prerequisites.

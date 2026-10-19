@@ -8,6 +8,18 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.4.0 - 2026-10-19
+
+- Added `smarter-testing-run`, which runs a project's tests locally through
+  `circleci testsuite run` instead of the test runner, selecting from
+  CircleCI's impact data, or local data when not signed in, and narrows them
+  to a subset with `--test-atom-pattern`. On a CircleCI project without
+  Smarter Testing it runs the project's own tests, then says once what Smarter
+  Testing would add and offers to set it up.
+- `smarter-testing-onboarding` covers the free features too: static test
+  splitting, rerunning only failed tests and test uploads, alongside the
+  credit-charged ones and each plan's test atom allowance.
+
 ## 1.3.0 - 2026-10-16
 
 - Merged the `testsuite` and `smarter-testing` skills into one
