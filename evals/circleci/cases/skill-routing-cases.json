@@ -73,6 +73,18 @@
         "dynamic parallelism"
       ]
     },
+    "circleci-smarter-testing-run": {
+      "phrases": [
+        "test-atom-pattern",
+        "test atom pattern",
+        "run the tests locally",
+        "run tests locally",
+        "run my tests",
+        "testsuite run",
+        "--local",
+        "subset of tests"
+      ]
+    },
     "circleci-smarter-testing-debugging": {
       "phrases": [
         "testsuite impact",
@@ -193,6 +205,18 @@
     {
       "prompt": "Set up CircleCI Smarter Testing's auto rerun failed tests feature for our testsuite.",
       "expected": "circleci-smarter-testing-onboarding"
+    },
+    {
+      "prompt": "Use $circleci-smarter-testing-run to run the tests for the api package.",
+      "expected": "circleci-smarter-testing-run"
+    },
+    {
+      "prompt": "Run the tests locally for just the files under src/api with a test atom pattern.",
+      "expected": "circleci-smarter-testing-run"
+    },
+    {
+      "prompt": "I changed the billing code, run my tests locally before I push.",
+      "expected": "circleci-smarter-testing-run"
     },
     {
       "prompt": "Use $circleci-smarter-testing-debugging to explain why this test atom was skipped in my last job.",
