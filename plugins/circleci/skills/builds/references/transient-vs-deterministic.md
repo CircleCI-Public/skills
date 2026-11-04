@@ -17,7 +17,8 @@ Sources:
 - Network timeouts to external package registries or APIs.
 - Temporary infrastructure instability.
 - Spot/interruption-style executor loss.
-- Flaky tests with a history of passing unchanged on rerun.
+- Flaky tests with a history of passing unchanged on rerun. `circleci testresult flaky`
+  lists the project's known flakes, so check a failing test's name against it.
 - A rerun on the same commit succeeds without any code or config change.
 
 ## Likely Deterministic Signals

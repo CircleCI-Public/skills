@@ -1,6 +1,6 @@
 ---
 name: circleci-cli
-description: Day-to-day CircleCI from the terminal with the circleci CLI — authenticate, validate config before you commit, watch the run your push triggered, review pipeline/workflow/job status, read job logs and failed tests, download artifacts, and rerun/cancel/trigger. Use when a developer asks to authenticate CLI access, check their build or pipeline status, watch a run after pushing, see why CI failed, read job output/logs, find failing tests, rerun failed jobs, cancel or re-trigger a run, validate a config change locally, or look up a project's environment variables, contexts, triggers or pipeline definitions. For first-time project connection / pipeline-definition setup use the onboarding skill; for the diagnose-and-fix methodology on a failing build use circleci-builds.
+description: Day-to-day CircleCI from the terminal with the circleci CLI — authenticate, validate config before you commit, watch the run your push triggered, review pipeline/workflow/job status, read job logs and failed tests, list a project's flaky tests, download artifacts, and rerun/cancel/trigger. Use when a developer asks to authenticate CLI access, check their build or pipeline status, watch a run after pushing, see why CI failed, read job output/logs, find failing tests, list flaky tests, rerun failed jobs, cancel or re-trigger a run, validate a config change locally, or look up a project's environment variables, contexts, triggers or pipeline definitions. For first-time project connection / pipeline-definition setup use the onboarding skill; for the diagnose-and-fix methodology on a failing build use circleci-builds.
 ---
 
 # CircleCI day-to-day developer workflow (CLI)
@@ -84,6 +84,7 @@ circleci job output list <job-id>              # per-step logs (rendered; --tail
 circleci job output get  <job-id> --step-num <N>   # full output of one step (--execution <i> for parallel runs)
 circleci job get <job-id>                      # job metadata (status, timing, parallelism)
 circleci testresult list <job-id>              # FAILED tests only by default (--all, --filter result=…, --sort, --limit)
+circleci testresult flaky                      # the project's flaky tests, most-flaked first: is a failing test a known flake?
 circleci job artifact <job-id>                 # list artifacts; -o <dir> to download them
 ```
 Parallel jobs: `job output list --execution <index>` targets one shard.
@@ -110,6 +111,7 @@ CLI flag for it; `circleci run open` gets you there fast.
 | Which workflow/job failed | `circleci run get --json --jq '.workflows[].jobs[] \| select(.current_outcome=="failed")'` |
 | Why a step failed (logs) | `circleci job output list <job-id>` → `job output get <job-id> --step-num N` |
 | Which tests failed | `circleci testresult list <job-id>` |
+| Which tests are flaky in this project | `circleci testresult flaky` (`--json`: one test per line, with `times_flaked`) |
 | Build outputs / reports | `circleci job artifact <job-id> -o ./artifacts` |
 | Config problem before pushing | `circleci config validate` / `circleci config process` |
 | Config error in the UI vs local | validate with `--org` to match private-orb resolution |

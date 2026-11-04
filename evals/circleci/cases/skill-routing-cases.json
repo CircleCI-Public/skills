@@ -289,6 +289,10 @@
     {
       "prompt": "What deploy setup does this repo already have, and can you add auto-rollback with a validation webhook from Datadog?",
       "expected": "circleci-deploy-setup"
+    },
+    {
+      "prompt": "Use the CircleCI CLI to list the flaky tests in this project.",
+      "expected": "circleci-cli"
     }
   ]
 }

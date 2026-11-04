@@ -22,6 +22,7 @@ prefix. An execution of a pipeline is a **run** (`/runs`); `/pipelines` holds pi
 | Step output | `circleci job output list <job-id>`, `circleci job output get <job-id> --step-num <n>` | `GET /jobs/{id}/stdout` |
 | Artifacts | `circleci job artifact <job-id>` | `GET /jobs/{id}/artifacts` |
 | Test results | `circleci testresult list <job-id>` | `GET /jobs/{id}/tests` |
+| Flaky tests in a project | `circleci testresult flaky` | `POST /test-flakes/search` |
 | CPU and memory use | `circleci job resource-usage get <job-id>` | `GET /jobs/{id}/resource-usage` |
 
 Run ids accept a UUID or a run number. Workflow and job ids are UUIDs, printed by
