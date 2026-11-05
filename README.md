@@ -35,14 +35,48 @@ codex plugin marketplace add CircleCI-Public/skills
 codex plugin add circleci@circleci-skills
 ```
 
+### Cursor
+
+```
+npx skills add CircleCI-Public/skills -a cursor --skill circleci-cli
+```
+
+That installs the CLI skill with the `npx skills` installer described in the
+next section, which also covers installing the others. Without Node, copy the
+skills by hand as described under "Any agent that reads SKILL.md", into
+`~/.cursor/skills/`.
+
+### Any agent: npx skills
+
+[skills](https://github.com/vercel-labs/skills) installs skills for Cursor,
+Codex, Claude Code and most other agents. It needs Node 22.20 or later.
+
+```
+npx skills add CircleCI-Public/skills -a cursor --skill circleci-cli  # only the CLI skill
+npx skills add CircleCI-Public/skills -a cursor                       # in a terminal, pick from a list
+npx skills add CircleCI-Public/skills --list                          # list without installing
+```
+
+`-a` names the agent. `--skill` takes one or more names from the skills'
+`SKILL.md` files (`circleci-cli`, not `cli`). Without `--skill`, an agent
+running the command, or `-y`, installs every skill in this repository, the
+chunk ones included; only a terminal shows the list.
+
+Pass `-g` to install for your user rather than the current project. Without it,
+an agent gets the project, and a terminal asks which you want.
+
 ### Any agent that reads SKILL.md
 
 The skills are plain markdown under `plugins/<plugin>/skills/<skill>/SKILL.md`,
 with no plugin runtime required. Point your agent at that directory, or copy the
-ones you want into wherever it looks for skills.
+ones you want into wherever it looks for skills. When you copy one, name its
+folder after the `name` in its `SKILL.md`: `skills/cli` becomes `circleci-cli`.
+The [Agent Skills spec](https://agentskills.io/specification) requires the two
+to match.
 
 Most of these drive the [circleci CLI](https://github.com/CircleCI-Public/circleci-cli),
-so install that too and run `circleci auth login` once.
+so install that too and run `circleci auth login` once. `circleci help agents`
+prints these install steps from the CLI.
 
 ## Updating
 
