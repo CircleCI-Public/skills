@@ -283,7 +283,8 @@ AskUserQuestion(
     { label: "Secrets / env vars",  description: "Store API keys safely with circleci envvar or contexts" },
     { label: "Test parallelism",    description: "Split tests across multiple containers to go faster" },
     { label: "Dependency caching",  description: "Cache node_modules / pip / gradle to speed up builds" },
-    { label: "Orbs",                description: "Reusable config packages for common tools (AWS, Docker, etc.)" }
+    { label: "Functions",           description: "One step to install a language or tool in a new config (Node, Python, Docker, AWS CLI, etc.)" },
+    { label: "Orbs",                description: "Reusable config packages, for pipelines that already use them" }
   ]
 )
 ```

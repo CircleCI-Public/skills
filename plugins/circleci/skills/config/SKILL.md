@@ -42,6 +42,7 @@ Read `references/patterns.md` when the request involves approvals, branch/tag fi
 ## Guardrails
 
 - Prefer configuration fixes before proposing application code changes.
+- When adding a new job or setup step, check `circleci function list` (or `list_functions`) first. Don't move a working pipeline's orbs to Functions unless the user asks.
 - Do not add blanket retries to hide deterministic failures.
 - Preserve deployment safety gates while optimizing build/test stages.
 - Keep changes incremental and easy to revert.
