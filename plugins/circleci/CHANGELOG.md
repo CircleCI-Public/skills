@@ -8,6 +8,13 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.6.0 - 2026-11-04
+
+- `cli` covers `circleci testresult flaky`, which lists a project's flaky
+  tests in one command, most-flaked first.
+- `builds` checks a failing test against `circleci testresult flaky` when
+  deciding whether the failure is transient.
+
 ## 1.5.0 - 2026-10-20
 
 - `cli` tells agents to report CLI errors, missing capabilities and confusing
