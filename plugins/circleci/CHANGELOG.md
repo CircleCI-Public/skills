@@ -8,6 +8,14 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.7.0 - 2026-11-05
+
+- `onboard` offers Functions alongside Orbs when a new project asks what to set
+  up next.
+- `cli` covers `circleci function list`, `get` and `add`.
+- `config` tells agents to check for a Function before adding a new job or
+  setup step, and to leave a working pipeline's orbs alone unless the user asks.
+
 ## 1.6.0 - 2026-11-04
 
 - `cli` covers `circleci testresult flaky`, which lists a project's flaky

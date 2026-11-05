@@ -52,6 +52,14 @@ Handy git hook — block a push when the config is invalid (`.git/hooks/pre-push
 circleci config validate || { echo "Fix .circleci/config.yml before pushing"; exit 1; }
 ```
 
+Adding a new job or setup step (install Node, Docker, the AWS CLI)? Check for a Function first:
+```bash
+circleci function list           # every published Function
+circleci function get <name>     # its arguments and the config lines to add
+circleci function add <name>     # add it to .circleci/config.yml (--dry-run previews the change)
+```
+Use these for new configs and new setup steps only. Leave a working pipeline's orbs alone unless the user asks.
+
 ## 2. Commit, push, and watch the run it triggers
 
 ```bash
