@@ -15,6 +15,7 @@ prefix. An execution of a pipeline is a **run** (`/runs`); `/pipelines` holds pi
 | Recent runs for a project | `circleci run list [--branch <b>] [--project gh/org/repo]` | `POST /runs/search` |
 | Your own recent runs, every project | `circleci my runs` | `GET /runs?filter[user_id]=me` |
 | One run and its workflows | `circleci run get <run-id>` | `GET /runs/{id}` |
+| Every failed step's output, for your newest failed run | `circleci my runs --failure-report` | `GET /runs?filter[user_id]=me&filter[current_outcome]=failed`, then the run's workflows, jobs and step output |
 | Workflows of a run | `circleci workflow list <run-id>` | `GET /workflows` |
 | One workflow and its jobs | `circleci workflow get <workflow-id>` (`--json`: `jobs[]`) | `GET /workflows/{id}`, `GET /jobs?filter[workflow_id]=` |
 | Rerun or cancel a workflow | `circleci workflow rerun <workflow-id>`, `circleci workflow cancel <workflow-id>` | `POST /workflows/{id}/rerun`, `POST /workflows/{id}/cancel` |
