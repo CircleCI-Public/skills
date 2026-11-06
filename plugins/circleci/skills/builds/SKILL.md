@@ -22,6 +22,10 @@ Read `../config/references/test-results.md` when the failure involves missing te
 ## Workflow
 
 1. Identify the primary failing signal.
+   - With the circleci CLI, start with `circleci my runs --failure-report` (your newest
+     failed run in any project) or `circleci run get <run-id> --failure-report`. It
+     prints every failed step's output in one call, so read it before fetching jobs,
+     logs or tests one at a time.
    - Record the first failing job and step, not every downstream failure.
 2. Classify issue type.
    - Config syntax/reference issue

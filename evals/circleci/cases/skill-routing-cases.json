@@ -293,6 +293,10 @@
     {
       "prompt": "Use the CircleCI CLI to list the flaky tests in this project.",
       "expected": "circleci-cli"
+    },
+    {
+      "prompt": "Use the CircleCI CLI to show me why my latest failed build failed.",
+      "expected": "circleci-cli"
     }
   ]
 }
