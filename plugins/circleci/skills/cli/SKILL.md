@@ -1,6 +1,6 @@
 ---
 name: circleci-cli
-description: Day-to-day CircleCI from the terminal with the circleci CLI — authenticate, validate config before you commit, watch the run your push triggered, review pipeline/workflow/job status, read job logs and failed tests, list a project's flaky tests, download artifacts, and rerun/cancel/trigger. Use when a developer asks to authenticate CLI access, check their build or pipeline status, watch a run after pushing, see why CI failed, read job output/logs, find failing tests, list flaky tests, rerun failed jobs, cancel or re-trigger a run, validate a config change locally, or look up a project's environment variables, contexts, triggers or pipeline definitions. For first-time project connection / pipeline-definition setup use the onboarding skill; for the diagnose-and-fix methodology on a failing build use circleci-builds.
+description: Day-to-day CircleCI from the terminal with the circleci CLI — authenticate, validate config before you commit, watch the run your push triggered, review pipeline/workflow/job status, print a failure report for your latest failed run in one command, read job logs and failed tests, list a project's flaky tests, download artifacts, and rerun/cancel/trigger. Use when a developer asks to authenticate CLI access, check their build or pipeline status, watch a run after pushing, see why CI failed, read job output/logs, find failing tests, list flaky tests, rerun failed jobs, cancel or re-trigger a run, validate a config change locally, or look up a project's environment variables, contexts, triggers or pipeline definitions. For first-time project connection / pipeline-definition setup use the onboarding skill; for the diagnose-and-fix methodology on a failing build use circleci-builds.
 ---
 
 # CircleCI day-to-day developer workflow (CLI)
@@ -86,7 +86,13 @@ circleci run open                    # open the current branch's run in the brow
 
 ## 4. Drill into a failure
 
+Start with the failure report: one command that prints every failed step's output,
+grouped by workflow and job, then the commands to run next. Drill down further only
+if it doesn't answer the question.
+
 ```bash
+circleci my runs --failure-report              # START HERE: your newest failed run in any project (one still running counts)
+circleci run get --failure-report              # same report for the latest run on this branch, or pass <run-id>
 circleci run get --json --jq '.workflows[].jobs[] | select(.current_outcome=="failed") | {name,id}'   # failing jobs + UUIDs
 circleci job output list <job-id>              # per-step logs (rendered; --tail N, default last 200 lines/step)
 circleci job output get  <job-id> --step-num <N>   # full output of one step (--execution <i> for parallel runs)
@@ -116,6 +122,7 @@ CLI flag for it; `circleci run open` gets you there fast.
 |---|---|
 | Did my push build? Which run? | `circleci run watch --sha "$(git rev-parse HEAD)"` / `circleci run list -B` |
 | Overall status of the latest run | `circleci run get` |
+| Why my latest build failed | `circleci my runs --failure-report` (this branch: `circleci run get --failure-report`) |
 | Which workflow/job failed | `circleci run get --json --jq '.workflows[].jobs[] \| select(.current_outcome=="failed")'` |
 | Why a step failed (logs) | `circleci job output list <job-id>` → `job output get <job-id> --step-num N` |
 | Which tests failed | `circleci testresult list <job-id>` |
