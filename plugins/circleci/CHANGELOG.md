@@ -13,6 +13,9 @@ server. From 1.3.0 both manifests carry the same version.
 - `onboard` and `cli` treat `circleci config generate` as instructions to follow:
   it prints a prompt with the detected stack, how to find Functions and orbs, and
   a validate loop, and writes nothing. `--template` still writes a starter config.
+- `cli` covers `circleci run artifacts`, which lists or downloads every job's
+  artifacts in a run in one command, and `circleci run list --status` for finding
+  the last successful run.
 
 ## 1.8.0 - 2026-11-06
 

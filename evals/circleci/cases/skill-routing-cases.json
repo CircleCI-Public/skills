@@ -29,6 +29,7 @@
         "build status",
         "pipeline status",
         "download artifacts",
+        "successful build",
         "job output",
         "failing tests",
         "re-trigger"
@@ -296,6 +297,10 @@
     },
     {
       "prompt": "Use the CircleCI CLI to show me why my latest failed build failed.",
+      "expected": "circleci-cli"
+    },
+    {
+      "prompt": "Download the test coverage report from my last successful build.",
       "expected": "circleci-cli"
     }
   ]

@@ -12,7 +12,7 @@ prefix. An execution of a pipeline is a **run** (`/runs`); `/pipelines` holds pi
 
 | What you want | Command | Endpoint |
 |---|---|---|
-| Recent runs for a project | `circleci run list [--branch <b>] [--project gh/org/repo]` | `POST /runs/search` |
+| Recent runs for a project | `circleci run list [--branch <b>] [--status <status>] [--project gh/org/repo]` | `POST /runs/search` |
 | Your own recent runs, every project | `circleci my runs` | `GET /runs?filter[user_id]=me` |
 | One run and its workflows | `circleci run get <run-id>` | `GET /runs/{id}` |
 | Every failed step's output, for your newest failed run | `circleci my runs --failure-report` | `GET /runs?filter[user_id]=me&filter[current_outcome]=failed`, then the run's workflows, jobs and step output |
@@ -21,7 +21,8 @@ prefix. An execution of a pipeline is a **run** (`/runs`); `/pipelines` holds pi
 | Rerun or cancel a workflow | `circleci workflow rerun <workflow-id>`, `circleci workflow cancel <workflow-id>` | `POST /workflows/{id}/rerun`, `POST /workflows/{id}/cancel` |
 | One job | `circleci job get <job-id>` | `GET /jobs/{id}` |
 | Step output | `circleci job output list <job-id>`, `circleci job output get <job-id> --step-num <n>` | `GET /jobs/{id}/stdout` |
-| Artifacts | `circleci job artifact <job-id>` | `GET /jobs/{id}/artifacts` |
+| Artifacts of every job in a run | `circleci run artifacts [<run-id>] [--status <status>]` | `GET /runs/{id}` (or `POST /runs/search` for the latest), the run's workflows and jobs, then `GET /jobs/{id}/artifacts` per job |
+| Artifacts of one job | `circleci job artifact <job-id>` | `GET /jobs/{id}/artifacts` |
 | Test results | `circleci testresult list <job-id>` | `GET /jobs/{id}/tests` |
 | Flaky tests in a project | `circleci testresult flaky` | `POST /test-flakes/search` |
 | CPU and memory use | `circleci job resource-usage get <job-id>` | `GET /jobs/{id}/resource-usage` |
