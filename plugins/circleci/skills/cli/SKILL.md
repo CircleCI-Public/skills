@@ -44,7 +44,9 @@ circleci config process .circleci/config.yml --pipeline-parameters params.yml   
 ```
 - `validate --org gh/<org>` is needed to resolve **private orbs**.
 - `-n/--next` previews upcoming (potentially breaking) config changes.
-- Scaffold a starter config for a new repo: `circleci config generate [path]` (won't overwrite).
+- Write or improve a config: `circleci config generate [path]` detects the stack and prints
+  instructions for you to follow, ending in a validate loop. It writes nothing; `--template`
+  writes a starter config instead.
 
 Handy git hook — block a push when the config is invalid (`.git/hooks/pre-push`):
 ```bash
