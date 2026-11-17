@@ -182,11 +182,13 @@ offer it.
 
 ### 4a — Config file
 
-`onboard` writes a starter config, and `config generate` detects the stack
-properly. Either way, don't prompt the user for a config strategy:
+`onboard` writes a starter config. Make it fit the repo with `config generate`,
+which detects the stack and prints instructions for you to follow: which
+Functions and orbs to look up, and how to validate. It writes nothing itself.
+Don't prompt the user for a config strategy:
 
 ```bash
-circleci config generate   # detects the stack; never overwrites an existing config
+circleci config generate   # prints instructions for you; follow them to edit the config
 circleci config validate
 ```
 
