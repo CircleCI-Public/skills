@@ -8,6 +8,12 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.10.0 - 2026-11-18
+
+- `cli` covers `circleci run artifacts`, which lists or downloads every job's
+  artifacts in a run in one command, and `circleci run list --status` for finding
+  the last successful run.
+
 ## 1.9.0 - 2026-11-16
 
 - `onboard` and `cli` treat `circleci config generate` as instructions to follow:
