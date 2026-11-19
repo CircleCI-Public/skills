@@ -8,6 +8,29 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.11.0 - 2026-11-19
+
+- `onboard` runs the starter config's tests with `circleci testsuite run`,
+  handing setup to `smarter-testing-onboarding`, instead of a raw runner command
+  such as `npm test`. Its "Test parallelism" next step becomes "Faster tests",
+  which offers the credit-charged Smarter Testing features.
+- `smarter-testing-run` runs tests through Smarter Testing in any CircleCI
+  project, not only one with `.circleci/test-suites.yml`: without one,
+  `circleci testsuite run` detects the test runner and runs its default suite.
+  It falls back to the project's own test command only when no supported runner
+  is detected or the CLI is missing.
+- `smarter-testing-onboarding` keeps the default suite for the detected test
+  runner when it fits, and writes `.circleci/test-suites.yml` with
+  `circleci testsuite generate` only when it doesn't, or when a credit-charged
+  feature needs `options:`. It previews the default with `generate --dry-run`
+  and passes `--runner` when more than one runner is detected. `onboard`,
+  `smarter-testing-debugging` and `config` follow the same model.
+- `config`'s test results reference is Smarter Testing first: it flags raw and
+  legacy test steps and double uploads, and hands setup to
+  `smarter-testing-onboarding`.
+- `builds` and `config` name the command `circleci testsuite run`, not
+  `circleci run testsuite`.
+
 ## 1.10.0 - 2026-11-18
 
 - `cli` covers `circleci run artifacts`, which lists or downloads every job's
