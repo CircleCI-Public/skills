@@ -5,7 +5,7 @@ description: Debug CircleCI Smarter Testing on a project that is already onboard
 
 # CircleCI Smarter Testing Debugging
 
-Explains test selection and test runs on a suite that is already onboarded. If `.circleci/test-suites.yml` doesn't exist, use `circleci-smarter-testing-onboarding` first.
+Explains test selection and test runs on a suite that is already onboarded. A suite is onboarded when CI runs it with `circleci testsuite run`, whether it is defined in `.circleci/test-suites.yml` or is the default suite for a detected test runner. If CI doesn't run testsuite yet, use `circleci-smarter-testing-onboarding` first.
 
 Both commands are experimental — check `circleci testsuite impact --help` and `circleci testsuite result --help` if a flag below is rejected.
 

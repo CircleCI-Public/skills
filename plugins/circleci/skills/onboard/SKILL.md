@@ -194,9 +194,19 @@ circleci config validate
 
 Fix any validation errors before pushing.
 
-**Important:** before using `npm test` as a build step, check `package.json`
-for a `"test"` script. If it's missing, use `npm run build` instead (common
-for Next.js and other frontend-only projects with no test suite).
+**Tests run through Smarter Testing.** The test step is
+`circleci testsuite run "<suite name>"`, never a raw runner command (`npm test`,
+`pytest`, `go test`) or `circleci tests glob`/`split`/`run`. Set it up with the
+**circleci-smarter-testing-onboarding** skill: it checks the suite with
+`circleci testsuite doctor`, replaces the generated test step, and writes
+`.circleci/test-suites.yml` only when the default suite for the detected test
+runner doesn't fit the repo. Stop once doctor is clean and the free
+features work; the credit-charged features are offered at
+[Wrap-up](#wrap-up).
+
+If the repo has no tests (for example, `package.json` has no `"test"` script,
+common for Next.js and other frontend-only projects), leave the test step out
+and use `npm run build`.
 
 ### 4b — Commit, push, and watch
 
@@ -251,9 +261,9 @@ explain the change briefly, then loop back to 4b. Common fixes:
 
 | Symptom | Fix |
 |---|---|
-| `Missing script: "test"` | Replace `npm test` with `npm run build` |
+| `Missing script: "test"` | The repo has no tests: drop the test step and use `npm run build` |
 | Command not found | Add install step or use a different Docker image |
-| Test failures | Verify test command matches repo's actual test runner |
+| Test failures | Run `circleci testsuite doctor "<suite name>"` and follow its action items; if the suite runs the tests differently from the repo, generate it into `.circleci/test-suites.yml` and fix its `discover` and `run` command |
 | Permission denied | `chmod +x` the script, or switch to a non-root image |
 | Config schema error | Fix YAML per `circleci config validate` output |
 | Missing env var | Add it with `circleci envvar set <NAME> <value>` |
@@ -283,7 +293,7 @@ AskUserQuestion(
   multiSelect: true,
   options: [
     { label: "Secrets / env vars",  description: "Store API keys safely with circleci envvar or contexts" },
-    { label: "Test parallelism",    description: "Split tests across multiple containers to go faster" },
+    { label: "Faster tests",        description: "Smarter Testing: run only the tests a change impacts, split tests dynamically, auto-rerun failures" },
     { label: "Dependency caching",  description: "Cache node_modules / pip / gradle to speed up builds" },
     { label: "Functions",           description: "One step to install a language or tool in a new config (Node, Python, Docker, AWS CLI, etc.)" },
     { label: "Orbs",                description: "Reusable config packages, for pipelines that already use them" }
@@ -291,7 +301,8 @@ AskUserQuestion(
 )
 ```
 
-Then help with whatever they select.
+Then help with whatever they select. For **Faster tests**, pick up the
+credit-charged features step of **circleci-smarter-testing-onboarding**.
 
 ---
 
