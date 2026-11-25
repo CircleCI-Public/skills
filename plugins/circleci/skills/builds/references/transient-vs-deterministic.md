@@ -29,6 +29,27 @@ Sources:
 - Missing files, wrong working directories, or broken environment assumptions.
 - Cache or workspace path mismatches that fail the same way every time.
 
+## Stopped By The Plan
+
+Neither transient nor a defect: the job never ran. CircleCI refused to start it,
+so it has no logs, no test results and no resource usage. Its only step is a
+cancelled placeholder named `Error: Task information unavailable`, and the
+reason is in the job's errors (`circleci job get <job-id>`, under `## Errors`).
+
+| Error code | Means | Tell the user |
+| --- | --- | --- |
+| `free-plan-no-credits-available` | The org's plan has no credits left. | Quote the message. The job runs once the org upgrades its plan or its credits refill; nothing in the code or config is wrong. The CLI cannot say when a refill is due, so do not guess a date. |
+| `resource-class-not-in-plan` | The job asks for a resource class the plan does not include, or one that does not exist. The message names the class and image. | Check the class name in the config first: a typo gets the same error. If the name is right, either choose a class the plan includes or upgrade. This one can be fixed in the config. |
+| `execution-authorization-unknown` | The check that decides whether the job may run did not reach an answer. It is not documented, so go by its message rather than its code. | Quote the message. Do not say the org is out of credits or needs an upgrade on the strength of this code alone. |
+
+- Report the reason and stop. Do not rerun: the job is stopped the same way until
+  the plan changes. If the user asked for a rerun, say so before doing it.
+- Changing the plan is for whoever manages the org's billing. Do not attempt it.
+- Jobs downstream of a stopped job never ran either, and `circleci job get` on
+  them fails. They are not separate failures.
+- Mention an upgrade only when a job's errors say so. A job that ran its steps
+  and failed is never a plan problem, however quickly it failed.
+
 ## Rerun Guidance
 
 - Prefer manual investigation first when the first occurrence is ambiguous.

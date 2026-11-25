@@ -8,6 +8,15 @@ Before 1.3.0 the Codex manifest was versioned on its own. Its 1.1.0 was
 released from the same commit as Claude Code's 1.2.1, without the language
 server. From 1.3.0 both manifests carry the same version.
 
+## 1.12.0 - 2026-11-24
+
+- `builds` reads a failed job's errors before its logs. A job its plan stopped
+  from running (out of credits, a resource class not in the plan) has no logs,
+  so the skill reports the reason, points at upgrading or waiting for credits to
+  refill, and does not rerun the job. Its reference documents
+  `free-plan-no-credits-available`, `resource-class-not-in-plan` and
+  `execution-authorization-unknown`.
+
 ## 1.11.0 - 2026-11-19
 
 - `onboard` runs the starter config's tests with `circleci testsuite run`,
