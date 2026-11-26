@@ -9,7 +9,7 @@ description: Diagnose and fix failing CircleCI builds quickly and safely. Use wh
 
 Use this skill to turn failing CircleCI pipelines into actionable fixes with clear evidence. Prioritize fast root-cause isolation, minimal safe patches, and explicit validation criteria.
 
-Read `references/transient-vs-deterministic.md` when deciding whether a failure should be fixed in code/config, retried, mitigated with rerun behavior, or reported as external/transient.
+Read `references/transient-vs-deterministic.md` when deciding whether a failure should be fixed in code/config, retried, mitigated with rerun behavior, or reported as external/transient, and when a job never ran because its plan stopped it.
 Read `../config/references/test-results.md` when the failure involves missing test metadata, flaky test reruns, test splitting, or JUnit XML setup.
 
 ## Inputs To Gather
@@ -27,12 +27,19 @@ Read `../config/references/test-results.md` when the failure involves missing te
      prints every failed step's output in one call, so read it before fetching jobs,
      logs or tests one at a time.
    - Record the first failing job and step, not every downstream failure.
+   - A failed job with no failed step may never have run. Read its errors before
+     any log: `circleci job get <job-id>` lists them under `## Errors`, and
+     `--failure-report` lists such jobs under `## blocked jobs`. A job its plan
+     stopped (out of credits, a resource class not in the plan) has no logs. On
+     a CLI that shows neither, `circleci api jobs/<job-id>` returns them in
+     `attributes.errors`.
 2. Classify issue type.
    - Config syntax/reference issue
    - Environment/toolchain mismatch
    - Dependency/cache issue
    - Test or build regression
    - External/transient failure
+   - Plan limit: the job never ran (out of credits, a resource class not in the plan)
 3. Apply the smallest viable fix.
    - Patch only files tied to confirmed root cause.
    - Keep workaround scope narrow.
@@ -49,6 +56,7 @@ Read `../config/references/test-results.md` when the failure involves missing te
 - Treat external service outages as report-and-mitigate unless user asks for deeper redesign.
 - Keep confidence levels explicit when logs are incomplete.
 - Do not recommend automatic reruns or flaky-test workflows until the failure is classified as plausibly transient.
+- Do not rerun a job its plan stopped from running, or fetch its logs: report the reason, and point at upgrading or waiting for credits to refill.
 
 ## Output Contract
 
